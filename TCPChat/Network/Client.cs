@@ -8,7 +8,7 @@ namespace TCPChat
     {
         protected internal string Id { get; private set; }
         protected internal NetworkStream Stream { get; private set; }
-        string userName;
+        public User user;
         TcpClient client;
         Server server;
 
@@ -24,28 +24,26 @@ namespace TCPChat
         {
             try
             {
+                Message msg;
                 Stream = client.GetStream();
-                string message = GetMessage();
-                userName = message;
-
-                message = userName + " вошел в чат";
-                server.BroadcastMessage(message, this.Id);
-                Console.WriteLine(message);
 
                 while (true)
                 {
                     try
                     {
-                        message = GetMessage();
-                        message = String.Format("{0}: {1}", userName, message);
-                        Console.WriteLine(message);
-                        server.BroadcastMessage(message, this.Id);
+                        string message = GetMessage();
+                        if(message.Length > 1)
+                        {
+                            msg = new Message(Encoding.Unicode.GetBytes(message));
+                            if(msg.PostCode != 8 && msg.PostCode != 9 && msg.message != "")
+                            {
+                                server.BroadcastMessage(msg, this.Id);
+                            }
+                        }
                     }
                     catch
                     {
-                        message = String.Format("{0}: покинул чат", userName);
-                        Console.WriteLine(message);
-                        server.BroadcastMessage(message, this.Id);
+                        //server.BroadcastMessage(msg, this.Id);
                         break;
                     }
                 }

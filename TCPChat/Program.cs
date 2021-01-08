@@ -7,27 +7,53 @@ namespace TCPChat
 {
     class Program
     {
+        static User user;
+        static CMD cmd;
         static Server server;
-        static Thread thread;
+        static Thread ListenThread;
+        static Thread SendThread;
 
-        static string userName;
         private static string host = "127.0.0.1";
         private static int port = 8888;
         static TcpClient client;
         static NetworkStream stream;
 
+        static void RegisterUser()
+        {
+            Console.Write("Enter your name: ");
+            string userName = Console.ReadLine();
+            Console.Write("Enter your color (white): ");
+            string color = Console.ReadLine();
+            Console.Clear();
+
+            user = new User(userName, ColorParser.GetColorFromString(color));
+        }
+
+        static void ReadHost()
+        {
+            Console.Write("Enter host (127.0.0.1): ");
+            string temphost = Console.ReadLine();
+
+            if (temphost.Length > 1) host = temphost;
+
+            Console.Clear();
+        }
+
         static void StartServer()
         {
             try
             {
-                server = new Server();
-                thread = new Thread(new ThreadStart(server.Listen));
-                thread.Start();
+                RegisterUser();
 
-                userName = "Server";
-                Console.WriteLine("Welcome, ", userName);
-                Thread sendthread = new Thread(new ThreadStart(SendFromServer));
-                sendthread.Start();
+                server = new Server(cmd);
+                ListenThread = new Thread(new ThreadStart(server.Listen));
+                ListenThread.Start();
+
+                Console.Write("Welcome, ");
+                cmd.Write(user.UserName, user.Color);
+
+                SendThread = new Thread(new ThreadStart(SendFromServer));
+                SendThread.Start();
             }
             catch(Exception ex)
             {
@@ -38,8 +64,9 @@ namespace TCPChat
 
         static void StartClient()
         {
-            Console.Write("Enter your name: ");
-            userName = Console.ReadLine();
+            RegisterUser();
+            ReadHost();
+
             client = new TcpClient();
 
             try
@@ -47,14 +74,16 @@ namespace TCPChat
                 client.Connect(host, port);
                 stream = client.GetStream();
 
-                string message = userName;
-                byte[] data = Encoding.Unicode.GetBytes(message);
+                Message message = new Message(8, user);
+
+                byte[] data = message.Serialize();
                 stream.Write(data, 0, data.Length);
 
                 Thread receiveThread = new Thread(new ThreadStart(ReceiveMessage));
                 receiveThread.Start();
 
-                Console.WriteLine("Welcome, {0}", userName);
+                Console.Write("Welcome, ");
+                cmd.Write(user.UserName, user.Color);
                 SendMessage();
             }
             catch(Exception ex)
@@ -69,7 +98,10 @@ namespace TCPChat
 
         static void Main(string[] args)
         {
+            cmd = new CMD();
+
         askAgain:
+            
             Console.WriteLine("Server or client? (s/c)");
             string option = Console.ReadLine();
             option = option.ToLower();
@@ -85,23 +117,24 @@ namespace TCPChat
 
         static void SendFromServer()
         {
-            Console.WriteLine("Введите сообщение: ");
-
             while(true)
             {
-                string message = "Server: " + Console.ReadLine();
-                server.BroadcastFromServer(message);
+                string message = cmd.ReadLine();
+                Message msg = new Message(1, user, message);
+                cmd.UserWriteLine(message, user);
+                server.BroadcastFromServer(msg);
             }
         }
 
         static void SendMessage()
         {
-            Console.WriteLine("Введите сообщение: ");
-
             while (true)
             {
-                string message = Console.ReadLine();
-                byte[] data = Encoding.Unicode.GetBytes(message);
+                string message = cmd.ReadLine();
+                cmd.UserWriteLine(message, user);
+                Message msg = new Message(1, user, message);
+
+                byte[] data = msg.Serialize();
                 stream.Write(data, 0, data.Length);
             }
         }
@@ -115,6 +148,7 @@ namespace TCPChat
                     byte[] data = new byte[64];
                     StringBuilder builder = new StringBuilder();
                     int bytes = 0;
+
                     do
                     {
                         bytes = stream.Read(data, 0, data.Length);
@@ -122,13 +156,16 @@ namespace TCPChat
                     }
                     while (stream.DataAvailable);
 
-                    string message = builder.ToString();
-                    Console.WriteLine(message);
+                    if(builder.ToString().Length > 0)
+                    {
+                        Message msg = new Message(Encoding.Unicode.GetBytes(builder.ToString()));
+                        cmd.ParseMessage(msg);
+                    }
                 }
-                catch
+                catch(Exception ex)
                 {
-                    Console.WriteLine("Подключение прервано!");
-                    Console.ReadLine();
+                    cmd.WriteLine("Lost Connection: " + ex.Message);
+                    cmd.ReadLine();
                     Disconnect();
                 }
             }
