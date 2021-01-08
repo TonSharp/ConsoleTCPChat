@@ -14,7 +14,7 @@ namespace TCPChat
         static Thread SendThread;
 
         private static string host = "127.0.0.1";
-        private static int port = 8888;
+        private static int port = 23;
         static TcpClient client;
         static NetworkStream stream;
 

@@ -4,6 +4,8 @@ using System.Text;
 
 namespace TCPChat
 {
+    //TODO:
+    //1. Drop here serialization/deserialization
     public class User
     {
         public string UserName

@@ -8,21 +8,15 @@ using System.Threading;
 
 namespace TCPChat
 {
-
     public class Server
     {
-        static TcpListener tcpListener;
-        List<Client> clients = new List<Client>();
-        CMD LocalCMD;
+        private static TcpListener tcpListener;
+        private List<Client> clients = new List<Client>();
+        private CMD LocalCMD;
 
         public Server(CMD cmd)
         {
             LocalCMD = cmd;
-        }
-
-        public void Write(Message msg)
-        {
-            LocalCMD.UserWriteLine(msg.message, msg.Sender);
         }
 
         protected internal void AddConnection(Client clientObject)
@@ -41,7 +35,7 @@ namespace TCPChat
         {
             try
             {
-                tcpListener = new TcpListener(IPAddress.Any, 8888);
+                tcpListener = new TcpListener(IPAddress.Any, 23);
                 tcpListener.Start();
                 LocalCMD.WriteLine("Server started, waiting for connections...");
                 LocalCMD.SwitchToPrompt();

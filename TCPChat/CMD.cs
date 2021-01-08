@@ -70,13 +70,13 @@ namespace TCPChat
             messagePosition.Y++;
         }
 
-        public void JoiningMessage(User Sender)
+        public void ConnectionMessage(User Sender, string str)
         {
             Console.ForegroundColor = Sender.Color;
             Console.SetCursorPosition(messagePosition.X, messagePosition.Y);
             Console.Write(Sender.UserName);
             Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(" has joined");
+            Console.WriteLine(" " + str);
             messagePosition.Y++;
         }
 
@@ -101,31 +101,13 @@ namespace TCPChat
         {
             switch(message.PostCode)
             {
-                case 1:
-                    {
-                        UserWriteLine(message.message, message.Sender);
-                        break;
-                    }
-                case 8:
-                    {
-                        JoiningMessage(message.Sender);
-
-                        break;
-                    }
-
-                case 9:
-                    {
-                        Console.ForegroundColor = message.Sender.Color;
-                        Console.SetCursorPosition(messagePosition.X, messagePosition.Y);
-                        Console.WriteLine(message.Sender.UserName + " has disconnected");
-                        messagePosition.Y++;
-
-                        break;
-                    }
-                default:
-                    {
-                        return;
-                    }
+                case 1: 
+                    UserWriteLine(message.message, message.Sender); break;
+                case 8: 
+                    ConnectionMessage(message.Sender, "has joined"); break;
+                case 9: 
+                    ConnectionMessage(message.Sender, "has disconnected"); break;
+                default: return;
             }
 
             CheckBufferArea();

@@ -8,16 +8,11 @@ namespace TCPChat
     {
         public static ConsoleColor GetColorFromString(string color)
         {
-            color = color.ToLower();
+            ConsoleColor consoleColor;
+            Enum.TryParse(color, true, out consoleColor);
+            if (consoleColor == ConsoleColor.Black) consoleColor = ConsoleColor.White;
 
-            return color switch
-            {
-                "red"   => ConsoleColor.Red,
-                "green" => ConsoleColor.Green,
-                "blue"  => ConsoleColor.Blue,
-                "white" => ConsoleColor.White,
-                _       => ConsoleColor.White,
-            };
+            return consoleColor;
         }
     }
 }

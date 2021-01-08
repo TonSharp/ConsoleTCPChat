@@ -43,7 +43,8 @@ namespace TCPChat
                     }
                     catch
                     {
-                        //server.BroadcastMessage(msg, this.Id);
+                        Message disconnMsg = new Message(9, user);
+                        server.BroadcastMessage(disconnMsg, this.Id);
                         break;
                     }
                 }
