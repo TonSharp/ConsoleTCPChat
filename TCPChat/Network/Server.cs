@@ -8,6 +8,7 @@ using System.Threading;
 
 namespace TCPChat
 {
+
     public class Server
     {
         static TcpListener tcpListener;

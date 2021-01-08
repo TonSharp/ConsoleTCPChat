@@ -12,8 +12,10 @@ namespace TCPChat
         {
             if (messagePosition.Y >= promptPosition.Y)
             {
-                Console.MoveBufferArea(0, 1, Console.BufferWidth, messagePosition.Y, 0, 0);
-                messagePosition.Y--;
+                Console.SetCursorPosition(promptPosition.X, promptPosition.Y);
+                Console.Write("  ");
+                promptPosition.Y++;
+                Console.SetCursorPosition(promptPosition.X, promptPosition.Y);
             }
         }
 
@@ -91,7 +93,8 @@ namespace TCPChat
 
         public void SwitchToPrompt()
         {
-            Console.SetCursorPosition(2, promptPosition.Y);
+            Console.SetCursorPosition(0, promptPosition.Y);
+            Console.Write("> ");
         }
 
         public void ParseMessage(Message message)
@@ -106,7 +109,6 @@ namespace TCPChat
                 case 8:
                     {
                         JoiningMessage(message.Sender);
-                        messagePosition.Y++;
 
                         break;
                     }
@@ -126,6 +128,7 @@ namespace TCPChat
                     }
             }
 
+            CheckBufferArea();
             SwitchToPrompt();
         }
     }
