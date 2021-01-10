@@ -13,10 +13,12 @@ namespace TCPChat
         private static TcpListener tcpListener;
         private List<Client> clients = new List<Client>();
         private CMD LocalCMD;
+        private int port;
 
-        public Server(CMD cmd)
+        public Server(CMD cmd, int port)
         {
             LocalCMD = cmd;
+            this.port = port;
         }
 
         protected internal void AddConnection(Client clientObject)
@@ -35,7 +37,7 @@ namespace TCPChat
         {
             try
             {
-                tcpListener = new TcpListener(IPAddress.Any, 23);
+                tcpListener = new TcpListener(IPAddress.Any, port);
                 tcpListener.Start();
                 LocalCMD.WriteLine("Server started, waiting for connections...");
                 LocalCMD.SwitchToPrompt();
@@ -43,25 +45,7 @@ namespace TCPChat
                 while (true)
                 {
                     TcpClient tcpClient = tcpListener.AcceptTcpClient();
-
                     Client clientObject = new Client(tcpClient, this);
-
-                    NetworkStream stream = tcpClient.GetStream();
-
-                    byte[] data = new byte[64];
-                    StringBuilder builder = new StringBuilder();
-                    int bytes = 0;
-                    do
-                    {
-                        bytes = stream.Read(data, 0, data.Length);
-                        builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
-                    }
-                    while (stream.DataAvailable);
-
-                    User user = GetUser(Encoding.Unicode.GetBytes(builder.ToString()));
-                    clientObject.user = user;
-
-                    BroadcastMessage(new Message(8, user), clientObject.Id);
 
                     Thread clientThread = new Thread(new ThreadStart(clientObject.Process));
                     clientThread.Start();
@@ -85,6 +69,7 @@ namespace TCPChat
         {
             byte[] data = msg.Serialize();
             LocalCMD.ParseMessage(msg);
+            if (msg.PostCode == 9) RemoveConnection(id);
             for (int i = 0; i < clients.Count; i++)
             {
                 if(clients[i].Id != id)
@@ -109,7 +94,6 @@ namespace TCPChat
             {
                 clients[i].Close();
             }
-            Environment.Exit(0);
         }
     }
 }

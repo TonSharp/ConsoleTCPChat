@@ -9,8 +9,8 @@ namespace TCPChat
         protected internal string Id { get; private set; }
         protected internal NetworkStream Stream { get; private set; }
         public User user;
-        TcpClient client;
-        Server server;
+        private TcpClient client;
+        private Server server;
 
         public Client(TcpClient tcpClient, Server serverObject)
         {
@@ -26,16 +26,17 @@ namespace TCPChat
             {
                 Message msg;
                 Stream = client.GetStream();
+                InitializeUserData();
 
                 while (true)
                 {
                     try
                     {
                         string message = GetMessage();
-                        if(message.Length > 1)
+                        if(message.Length > 0)
                         {
                             msg = new Message(Encoding.Unicode.GetBytes(message));
-                            if(msg.PostCode != 8 && msg.PostCode != 9 && msg.message != "")
+                            if(msg.PostCode != 8 && msg.message != "")
                             {
                                 server.BroadcastMessage(msg, this.Id);
                             }
@@ -57,6 +58,19 @@ namespace TCPChat
             {
                 server.RemoveConnection(this.Id);
                 Close();
+            }
+        }
+
+        public void InitializeUserData()
+        {
+            byte[] messageData = Encoding.Unicode.GetBytes(GetMessage());
+
+            if(messageData[0] == 8 || messageData[0] == 9)
+            {
+                byte[] userData = Serializer.CopyFrom(messageData, 4);
+                user = new User(userData);
+
+                server.BroadcastMessage(new Message(8, user), Id);
             }
         }
 

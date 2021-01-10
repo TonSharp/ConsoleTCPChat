@@ -5,8 +5,6 @@ using System.IO;
 
 namespace TCPChat
 {
-    //TODO:
-    //1. Drop here serialization/deserialization
     public class User
     {
         private int userDataSize
@@ -41,6 +39,18 @@ namespace TCPChat
         public User(byte[] Data, out byte[] OtherData)
         {
             string[] userDataStrings = Serializer.DeserializeString(Data, 2, out OtherData);
+
+            UserName = userDataStrings[0];
+            Color = ColorParser.GetColorFromString(userDataStrings[1]);
+        }
+
+        /// <summary>
+        /// Use this only for deserialization
+        /// </summary>
+        /// <param name="Data">Data that begins from UserData</param>
+        public User(byte[] Data)
+        {
+            string[] userDataStrings = Serializer.DeserializeString(Data, 2);
 
             UserName = userDataStrings[0];
             Color = ColorParser.GetColorFromString(userDataStrings[1]);

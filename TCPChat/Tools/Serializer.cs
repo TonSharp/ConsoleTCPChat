@@ -9,8 +9,6 @@ namespace TCPChat
     {
         public static byte[] CopyFrom(byte[] StartData, int MoveFrom)
         {
-            int j = 0;
-
             byte[] MovedData = new byte[StartData.Length - MoveFrom];
 
             for(int i = 0; i < StartData.Length; i++)
@@ -19,10 +17,9 @@ namespace TCPChat
 
                 else
                 {
-                    if(j < MovedData.Length)
+                    if(i - MoveFrom < MovedData.Length)
                     {
-                        MovedData[j] = StartData[i];
-                        j++;
+                        MovedData[i - MoveFrom] = StartData[i];
                     }
                 }
             }
