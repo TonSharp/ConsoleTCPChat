@@ -113,5 +113,11 @@ namespace TCPChat
             CheckBufferArea();
             SwitchToPrompt();
         }
+
+        public void Clear()
+        {
+            Console.Clear();
+            messagePosition.Y = 0;
+        }
     }
 }

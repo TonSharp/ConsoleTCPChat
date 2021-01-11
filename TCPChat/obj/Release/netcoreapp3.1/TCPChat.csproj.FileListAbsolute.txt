@@ -1,0 +1,13 @@
+D:\Projects\CS\TCPChat\TCPChat\bin\Release\netcoreapp3.1\TCPChat.exe
+D:\Projects\CS\TCPChat\TCPChat\bin\Release\netcoreapp3.1\TCPChat.deps.json
+D:\Projects\CS\TCPChat\TCPChat\bin\Release\netcoreapp3.1\TCPChat.runtimeconfig.json
+D:\Projects\CS\TCPChat\TCPChat\bin\Release\netcoreapp3.1\TCPChat.runtimeconfig.dev.json
+D:\Projects\CS\TCPChat\TCPChat\bin\Release\netcoreapp3.1\TCPChat.dll
+D:\Projects\CS\TCPChat\TCPChat\bin\Release\netcoreapp3.1\TCPChat.pdb
+D:\Projects\CS\TCPChat\TCPChat\obj\Release\netcoreapp3.1\TCPChat.AssemblyInfoInputs.cache
+D:\Projects\CS\TCPChat\TCPChat\obj\Release\netcoreapp3.1\TCPChat.AssemblyInfo.cs
+D:\Projects\CS\TCPChat\TCPChat\obj\Release\netcoreapp3.1\TCPChat.csproj.CoreCompileInputs.cache
+D:\Projects\CS\TCPChat\TCPChat\obj\Release\netcoreapp3.1\TCPChat.dll
+D:\Projects\CS\TCPChat\TCPChat\obj\Release\netcoreapp3.1\TCPChat.pdb
+D:\Projects\CS\TCPChat\TCPChat\obj\Release\netcoreapp3.1\TCPChat.genruntimeconfig.cache
+D:\Projects\CS\TCPChat\TCPChat\obj\Release\netcoreapp3.1\TCPChat.csprojAssemblyReference.cache

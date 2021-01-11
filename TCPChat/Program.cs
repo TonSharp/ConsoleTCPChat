@@ -80,6 +80,7 @@ namespace TCPChat
 
         static void Main(string[] args)
         {
+            Console.CancelKeyPress += ConsoleCancelKeyPressed;
             cmd = new CMD();
             RegisterUser();
 
@@ -159,6 +160,15 @@ namespace TCPChat
             }
         }
 
+        private static void ConsoleCancelKeyPressed()
+        {
+            Disconnect();
+        }
+        private static void ConsoleCancelKeyPressed(object sender, ConsoleCancelEventArgs e)
+        {
+            ConsoleCancelKeyPressed();
+        }
+
         private static void Disconnect()
         {
             if (RecieveThread != null)
@@ -182,6 +192,7 @@ namespace TCPChat
 
         private static void ParseCommand(string command)
         {
+            if (command.Length < 1) return;
             if (command[0] != '/')
             {
                 if (isConnected)
@@ -247,7 +258,7 @@ namespace TCPChat
                         {
                             if(args.Length == 1)
                             {
-                                Console.Clear();
+                                cmd.Clear();
                             }
                             break;
                         }
