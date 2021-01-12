@@ -139,7 +139,7 @@ namespace TCPChat
                         cmd.ParseMessage(msg);
                     }
                 }
-                catch (ThreadInterruptedException ex)
+                catch (ThreadInterruptedException)
                 {
                     return;
                 }
