@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
 using System.Net;
-using System.Text;
+using System.Net.Sockets;
 using System.Threading;
 
 namespace TCPChat
@@ -11,9 +10,9 @@ namespace TCPChat
     public class Server
     {
         private static TcpListener tcpListener;
-        private List<Client> clients = new List<Client>();
-        private CMD LocalCMD;
-        private int port;
+        private readonly List<Client> clients = new List<Client>();
+        private readonly CMD LocalCMD;
+        private readonly int port;
 
         public Server(CMD cmd, int port)
         {
@@ -72,7 +71,7 @@ namespace TCPChat
             if (msg.PostCode == 9) RemoveConnection(id);
             for (int i = 0; i < clients.Count; i++)
             {
-                if(clients[i].Id != id)
+                if (clients[i].Id != id)
                     clients[i].Stream.Write(data, 0, data.Length);
             }
         }

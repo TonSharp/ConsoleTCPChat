@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace TCPChat
 {
@@ -11,13 +10,13 @@ namespace TCPChat
         {
             byte[] MovedData = new byte[StartData.Length - MoveFrom];
 
-            for(int i = 0; i < StartData.Length; i++)
+            for (int i = 0; i < StartData.Length; i++)
             {
                 if (i < MoveFrom) continue;
 
                 else
                 {
-                    if(i - MoveFrom < MovedData.Length)
+                    if (i - MoveFrom < MovedData.Length)
                     {
                         MovedData[i - MoveFrom] = StartData[i];
                     }
@@ -41,7 +40,7 @@ namespace TCPChat
         {
             int size = 0;
 
-            foreach (var s in str)
+            foreach (string s in str)
             {
                 size += sizeof(int);
                 size += sizeof(char) * s.Length;
@@ -54,11 +53,11 @@ namespace TCPChat
         {
             byte[] data = new byte[GetStringDataSize(str)];
 
-            using (var stream = new MemoryStream(data))
+            using (MemoryStream stream = new MemoryStream(data))
             {
                 BinaryWriter writer = new BinaryWriter(stream);
 
-                foreach (var s in str)
+                foreach (string s in str)
                 {
                     writer.Write(s.Length);
                     writer.Write(Encoding.Unicode.GetBytes(s));
@@ -73,7 +72,7 @@ namespace TCPChat
             List<string> deserialized = new List<string>();
             int bytes = 0;
 
-            using (var stream = new MemoryStream(data))
+            using (MemoryStream stream = new MemoryStream(data))
             {
                 BinaryReader reader = new BinaryReader(stream);
 
@@ -93,7 +92,7 @@ namespace TCPChat
         {
             string[] deserialized = new string[count];
 
-            using (var stream = new MemoryStream(data))
+            using (MemoryStream stream = new MemoryStream(data))
             {
                 BinaryReader reader = new BinaryReader(stream);
 
@@ -113,7 +112,7 @@ namespace TCPChat
         {
             string[] deserialized = new string[count];
 
-            using (var stream = new MemoryStream(data))
+            using (MemoryStream stream = new MemoryStream(data))
             {
                 BinaryReader reader = new BinaryReader(stream);
 

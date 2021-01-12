@@ -5,21 +5,20 @@ using System.Threading;
 
 namespace TCPChat
 {
-    class Program
+    internal class Program
     {
-        static User user;
-        static CMD cmd;
-        static Server server;
-        static Thread ListenThread;
-        static Thread RecieveThread;
+        private static User user;
+        private static CMD cmd;
+        private static Server server;
+        private static Thread ListenThread;
+        private static Thread RecieveThread;
 
         private static string host = "127.0.0.1";
         private static int port = 23;
-        static TcpClient client;
-        static NetworkStream stream;
-
-        static bool isConnected = false;
-        static bool isServer = false;
+        private static TcpClient client;
+        private static NetworkStream stream;
+        private static bool isConnected = false;
+        private static bool isServer = false;
 
         private static void RegisterUser()
         {
@@ -41,7 +40,7 @@ namespace TCPChat
                 ListenThread = new Thread(new ThreadStart(server.Listen));
                 ListenThread.Start();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 server.Disconnect();
                 Console.WriteLine(ex.Message);
@@ -50,7 +49,7 @@ namespace TCPChat
 
         private static void StartClient()
         {
-            if(stream != null || client != null)
+            if (stream != null || client != null)
                 Disconnect();
 
             client = new TcpClient();
@@ -70,7 +69,7 @@ namespace TCPChat
                 RecieveThread = new Thread(new ThreadStart(ReceiveMessage));
                 RecieveThread.Start();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 isConnected = false;
@@ -78,19 +77,19 @@ namespace TCPChat
             }
         }
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             Console.CancelKeyPress += ConsoleCancelKeyPressed;
             cmd = new CMD();
             RegisterUser();
 
-            while(true)
+            while (true)
             {
                 ParseCommand(cmd.ReadLine());
             }
         }
 
-        static void SendFromServer(string message)
+        private static void SendFromServer(string message)
         {
             if (message.Length == 0) return;
 
@@ -99,14 +98,14 @@ namespace TCPChat
             server.BroadcastFromServer(msg);
         }
 
-        static void SendMessage(Message msg)
+        private static void SendMessage(Message msg)
         {
             cmd.ParseMessage(msg);
             byte[] data = msg.Serialize();
             stream.Write(data);
         }
 
-        static void SendMessage(string message)
+        private static void SendMessage(string message)
         {
             if (message.Length == 0) return;
 
@@ -134,25 +133,25 @@ namespace TCPChat
                     }
                     while (stream.DataAvailable);
 
-                    if(builder.ToString().Length > 0)
+                    if (builder.ToString().Length > 0)
                     {
                         Message msg = new Message(Encoding.Unicode.GetBytes(builder.ToString()));
                         cmd.ParseMessage(msg);
                     }
                 }
-                catch(ThreadInterruptedException ex)
+                catch (ThreadInterruptedException ex)
                 {
                     return;
                 }
-                catch(SocketException)
+                catch (SocketException)
                 {
                     return;
                 }
-                catch(System.IO.IOException)
+                catch (System.IO.IOException)
                 {
                     return;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     cmd.WriteLine("Lost Connection: " + ex.Message);
                     Disconnect();
@@ -186,7 +185,7 @@ namespace TCPChat
                 client.Close();
                 client = null;
             }
-                
+
             isConnected = false;
         }
 
@@ -247,7 +246,7 @@ namespace TCPChat
                         }
                     case string s when (s == "disconnect" || s == "dconnect"):
                         {
-                            if(args.Length == 1)
+                            if (args.Length == 1)
                             {
                                 SendMessage(new Message(9, user));
                                 Disconnect();
@@ -256,7 +255,7 @@ namespace TCPChat
                         }
                     case string s when (s == "clear" || s == "clr"):
                         {
-                            if(args.Length == 1)
+                            if (args.Length == 1)
                             {
                                 cmd.Clear();
                             }

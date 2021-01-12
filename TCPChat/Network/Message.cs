@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.IO;
+﻿using System.IO;
 
 namespace TCPChat
 {
@@ -69,14 +65,14 @@ namespace TCPChat
 
             byte[] data = new byte[sizeof(int) + userData.Length];
 
-            using (var stream = new MemoryStream(data))
+            using (MemoryStream stream = new MemoryStream(data))
             {
                 BinaryWriter writer = new BinaryWriter(stream);
                 writer.Write(PostCode);
                 writer.Write(userData);
             }
 
-            if(PostCode != 8 && PostCode != 9)
+            if (PostCode != 8 && PostCode != 9)
             {
                 byte[] Data = Serializer.SerializeString(message);
                 byte[] ExpandedData = Serializer.JoinBytes(data, Data);
@@ -88,7 +84,7 @@ namespace TCPChat
         }
         public void Deserialize(byte[] data)
         {
-            using (var stream = new MemoryStream(data))
+            using (MemoryStream stream = new MemoryStream(data))
             {
                 BinaryReader reader = new BinaryReader(stream);
                 PostCode = reader.ReadInt32();
@@ -98,7 +94,7 @@ namespace TCPChat
 
                 Sender = new User(userData, out otherData);
 
-                if(PostCode != 8 && PostCode != 9)
+                if (PostCode != 8 && PostCode != 9)
                 {
                     message = Serializer.DeserializeString(otherData, 1)[0];
                 }

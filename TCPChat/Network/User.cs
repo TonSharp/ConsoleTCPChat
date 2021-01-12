@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
 
 namespace TCPChat
@@ -9,7 +7,7 @@ namespace TCPChat
     {
         private int userDataSize
         {
-            get => Serializer.GetStringDataSize(UserName, Color.ToString());        
+            get => Serializer.GetStringDataSize(UserName, Color.ToString());
         }
 
         public string UserName
@@ -73,7 +71,7 @@ namespace TCPChat
         {
             byte[] data = new byte[userDataSize];
 
-            using(var stream = new MemoryStream(data))
+            using (MemoryStream stream = new MemoryStream(data))
             {
                 BinaryWriter writer = new BinaryWriter(stream);
 

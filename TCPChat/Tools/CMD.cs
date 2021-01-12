@@ -1,112 +1,128 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace TCPChat
 {
     public class CMD
     {
-        private Vector2 messagePosition, promptPosition, defaultPromptPos;
+        private readonly Vector2 messagePos, promptPos, defaultPromptPos, currentPromptPos;
 
         private void CheckBufferArea()
         {
-            if (messagePosition.Y >= promptPosition.Y)
+            if (messagePos.Y >= promptPos.Y)
             {
-                Console.SetCursorPosition(promptPosition.X, promptPosition.Y);
+                Console.SetCursorPosition(promptPos.X, promptPos.Y);
                 Console.Write("  ");
-                promptPosition.Y++;
-                Console.SetCursorPosition(promptPosition.X, promptPosition.Y);
+                promptPos.Y++;
+                Console.SetCursorPosition(promptPos.X, promptPos.Y);
             }
         }
 
         public CMD()
         {
-            messagePosition = new Vector2(0,0);
+            messagePos = new Vector2(0, 0);
             defaultPromptPos = new Vector2(0, 15);
-            promptPosition = new Vector2(0, defaultPromptPos.Y);
-            messagePosition.PositionChanged += CheckBufferArea;
+            currentPromptPos = new Vector2(0, defaultPromptPos.Y);
+            promptPos = new Vector2(0, defaultPromptPos.Y);
+            messagePos.PositionChanged += CheckBufferArea;
         }
 
         public void Write<T>(T message)
         {
+            currentPromptPos.X = Console.CursorLeft;
+            currentPromptPos.Y = promptPos.Y;
+
             Console.ForegroundColor = ConsoleColor.White;
-            Console.CursorTop = messagePosition.Y;
+            Console.CursorTop = messagePos.Y;
             Console.WriteLine(message);
-            messagePosition.Y++;
+            messagePos.Y++;
         }
 
         public void Write<T>(T message, ConsoleColor Color)
         {
+            currentPromptPos.X = Console.CursorLeft;
+            currentPromptPos.Y = promptPos.Y;
+
             Console.ForegroundColor = Color;
-            Console.CursorTop = messagePosition.Y;
+            Console.CursorTop = messagePos.Y;
             Console.WriteLine(message);
             Console.ForegroundColor = ConsoleColor.White;
-            messagePosition.Y++;
+            messagePos.Y++;
         }
 
         public void WriteLine<T>(T message)
         {
+            currentPromptPos.X = Console.CursorLeft;
+            currentPromptPos.Y = promptPos.Y;
+
             Console.ForegroundColor = ConsoleColor.White;
-            Console.SetCursorPosition(messagePosition.X, messagePosition.Y);
+            Console.SetCursorPosition(messagePos.X, messagePos.Y);
             Console.WriteLine(message);
-            messagePosition.Y++;
+            messagePos.Y++;
         }
 
         public void WriteLine<T>(T message, ConsoleColor Color)
         {
+            currentPromptPos.X = Console.CursorLeft;
+            currentPromptPos.Y = promptPos.Y;
+
             Console.ForegroundColor = Color;
-            Console.SetCursorPosition(messagePosition.X, messagePosition.Y);
+            Console.SetCursorPosition(messagePos.X, messagePos.Y);
             Console.WriteLine(message);
             Console.ForegroundColor = ConsoleColor.White;
-            messagePosition.Y++;
+            messagePos.Y++;
         }
 
         public void UserWriteLine<T>(T message, User Sender)
         {
+            currentPromptPos.X = Console.CursorLeft;
+            currentPromptPos.Y = promptPos.Y;
+
             Console.ForegroundColor = Sender.Color;
-            Console.SetCursorPosition(messagePosition.X, messagePosition.Y);
+            Console.SetCursorPosition(messagePos.X, messagePos.Y);
             Console.Write(Sender.UserName + ": ");
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine(message);
-            messagePosition.Y++;
+            messagePos.Y++;
         }
 
         public void ConnectionMessage(User Sender, string str)
         {
+            currentPromptPos.X = Console.CursorLeft;
+            currentPromptPos.Y = promptPos.Y;
+
             Console.ForegroundColor = Sender.Color;
-            Console.SetCursorPosition(messagePosition.X, messagePosition.Y);
+            Console.SetCursorPosition(messagePos.X, messagePos.Y);
             Console.Write(Sender.UserName);
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine(" " + str);
-            messagePosition.Y++;
+            messagePos.Y++;
         }
 
         public string ReadLine()
         {
-            Console.SetCursorPosition(promptPosition.X, promptPosition.Y);
+            Console.SetCursorPosition(promptPos.X, promptPos.Y);
             Console.Write("> ");
             string input = Console.ReadLine();
-            Console.SetCursorPosition(promptPosition.X, promptPosition.Y);
-            Console.Write(new String(' ', input.Length + 2));
+            Console.SetCursorPosition(promptPos.X, promptPos.Y);
+            Console.Write(new string(' ', input.Length + 2));
 
             return input;
         }
 
         public void SwitchToPrompt()
         {
-            Console.SetCursorPosition(0, promptPosition.Y);
-            Console.Write("> ");
+            Console.SetCursorPosition(currentPromptPos.X, currentPromptPos.Y);
         }
 
         public void ParseMessage(Message message)
         {
-            switch(message.PostCode)
+            switch (message.PostCode)
             {
-                case 1: 
+                case 1:
                     UserWriteLine(message.message, message.Sender); break;
-                case 8: 
+                case 8:
                     ConnectionMessage(message.Sender, "has joined"); break;
-                case 9: 
+                case 9:
                     ConnectionMessage(message.Sender, "has disconnected"); break;
                 default: return;
             }
@@ -118,8 +134,8 @@ namespace TCPChat
         public void Clear()
         {
             Console.Clear();
-            messagePosition.Y = 0;
-            promptPosition.Y = defaultPromptPos.Y;
+            messagePos.Y = 0;
+            promptPos.Y = defaultPromptPos.Y;
         }
     }
 }

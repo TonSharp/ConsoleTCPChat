@@ -9,8 +9,8 @@ namespace TCPChat
         protected internal string Id { get; private set; }
         protected internal NetworkStream Stream { get; private set; }
         public User user;
-        private TcpClient client;
-        private Server server;
+        private readonly TcpClient client;
+        private readonly Server server;
 
         public Client(TcpClient tcpClient, Server serverObject)
         {
@@ -33,19 +33,19 @@ namespace TCPChat
                     try
                     {
                         string message = GetMessage();
-                        if(message.Length > 0)
+                        if (message.Length > 0)
                         {
                             msg = new Message(Encoding.Unicode.GetBytes(message));
-                            if(msg.PostCode != 8 && msg.message != "")
+                            if (msg.PostCode != 8 && msg.message != "")
                             {
-                                server.BroadcastMessage(msg, this.Id);
+                                server.BroadcastMessage(msg, Id);
                             }
                         }
                     }
                     catch
                     {
                         Message disconnMsg = new Message(9, user);
-                        server.BroadcastMessage(disconnMsg, this.Id);
+                        server.BroadcastMessage(disconnMsg, Id);
                         break;
                     }
                 }
@@ -56,7 +56,7 @@ namespace TCPChat
             }
             finally
             {
-                server.RemoveConnection(this.Id);
+                server.RemoveConnection(Id);
                 Close();
             }
         }
@@ -65,7 +65,7 @@ namespace TCPChat
         {
             byte[] messageData = Encoding.Unicode.GetBytes(GetMessage());
 
-            if(messageData[0] == 8 || messageData[0] == 9)
+            if (messageData[0] == 8 || messageData[0] == 9)
             {
                 byte[] userData = Serializer.CopyFrom(messageData, 4);
                 user = new User(userData);
