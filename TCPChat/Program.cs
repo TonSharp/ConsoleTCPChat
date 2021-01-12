@@ -192,7 +192,7 @@ namespace TCPChat
 
         private static void ParseCommand(string command)
         {
-            if (command.Length < 1) return;
+            if (command.Trim().Length < 1) return;
             if (command[0] != '/')
             {
                 if (isConnected)
