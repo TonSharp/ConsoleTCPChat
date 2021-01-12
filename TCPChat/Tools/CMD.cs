@@ -6,7 +6,7 @@ namespace TCPChat
 {
     public class CMD
     {
-        private Vector2 messagePosition, promptPosition;
+        private Vector2 messagePosition, promptPosition, defaultPromptPos;
 
         private void CheckBufferArea()
         {
@@ -22,7 +22,8 @@ namespace TCPChat
         public CMD()
         {
             messagePosition = new Vector2(0,0);
-            promptPosition = new Vector2(0, 10);
+            defaultPromptPos = new Vector2(0, 15);
+            promptPosition = new Vector2(0, defaultPromptPos.Y);
             messagePosition.PositionChanged += CheckBufferArea;
         }
 
@@ -118,6 +119,7 @@ namespace TCPChat
         {
             Console.Clear();
             messagePosition.Y = 0;
+            promptPosition.Y = defaultPromptPos.Y;
         }
     }
 }
