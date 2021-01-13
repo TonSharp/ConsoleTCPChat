@@ -52,6 +52,16 @@ namespace TCPChat
         }
 
         /// <summary>
+        /// Use this only for sending id from server
+        /// </summary>
+        /// <param name="id">client id from the server</param>
+        public Message(string id)
+        {
+            this.PostCode = 5;
+            this.message = id;
+        }
+
+        /// <summary>
         /// Use this only for Deserialization
         /// </summary>
         public Message(byte[] data)
@@ -61,42 +71,101 @@ namespace TCPChat
 
         public byte[] Serialize()
         {
-            byte[] userData = Sender.Serialize();
+            byte[] userData;
+            byte[] messageData;
+            byte[] Data;
 
-            byte[] data = new byte[sizeof(int) + userData.Length];
-
-            using (MemoryStream stream = new MemoryStream(data))
+            switch(PostCode)
             {
-                BinaryWriter writer = new BinaryWriter(stream);
-                writer.Write(PostCode);
-                writer.Write(userData);
+                case int i when (i >= 1 && i <= 4):
+                    {
+                        userData = Sender.Serialize();
+                        messageData = Serializer.SerializeString(message);
+
+                        Data = new byte[sizeof(int) + userData.Length + messageData.Length];
+
+                        using (MemoryStream stream = new MemoryStream(Data))
+                        {
+                            BinaryWriter writer = new BinaryWriter(stream);
+                            writer.Write(PostCode);
+                            writer.Write(userData);
+                            writer.Write(messageData);
+                        }
+
+                        return Data;
+                    }
+
+                case 5:
+                    {
+                        messageData = Serializer.SerializeString(message);
+
+                        Data = new byte[sizeof(int) + messageData.Length];
+
+                        using (MemoryStream stream = new MemoryStream(Data))
+                        {
+                            BinaryWriter writer = new BinaryWriter(stream);
+                            writer.Write(PostCode);
+                            writer.Write(messageData);
+                        }
+
+                        return Data;
+                    }
+
+                case int i when (i >= 8 && i <= 9):
+                    {
+                        userData = Sender.Serialize();
+
+                        Data = new byte[sizeof(int) + userData.Length];
+
+                        using (MemoryStream stream = new MemoryStream(Data))
+                        {
+                            BinaryWriter writer = new BinaryWriter(stream);
+                            writer.Write(PostCode);
+                            writer.Write(userData);
+                        }
+
+                        return Data;
+                    }
+
+                default: return null;
             }
-
-            if (PostCode != 8 && PostCode != 9)
-            {
-                byte[] Data = Serializer.SerializeString(message);
-                byte[] ExpandedData = Serializer.JoinBytes(data, Data);
-
-                return ExpandedData;
-            }
-
-            return data;
         }
         public void Deserialize(byte[] data)
         {
+            byte[] userData;
+            byte[] messageData;
+
             using (MemoryStream stream = new MemoryStream(data))
             {
                 BinaryReader reader = new BinaryReader(stream);
                 PostCode = reader.ReadInt32();
 
-                byte[] userData = Serializer.CopyFrom(data, sizeof(int));
-                byte[] otherData;
-
-                Sender = new User(userData, out otherData);
-
-                if (PostCode != 8 && PostCode != 9)
+                switch(PostCode)
                 {
-                    message = Serializer.DeserializeString(otherData, 1)[0];
+                    case int i when (i >= 1 && i <= 4):
+                        {
+                            userData = Serializer.CopyFrom(data, sizeof(int));
+                            Sender = new User(userData, out messageData);
+
+                            message = Serializer.DeserializeString(messageData, 1)[0];
+                            break;
+                        }
+
+                    case 5:
+                        {
+                            messageData = Serializer.CopyFrom(data, sizeof(int));
+
+                            message = Serializer.DeserializeString(messageData, 1)[0];
+                            break;
+                        }
+
+                    case int i when (i >= 8 && i <= 9):
+                        {
+                            userData = Serializer.CopyFrom(data, sizeof(int));
+                            Sender = new User(userData);
+
+                            break;
+                        }
                 }
             }
         }
@@ -108,8 +177,8 @@ namespace TCPChat
 //2 - Send warning message
 //3 - Send error message
 //4 - Send notification message
-//5 - reserved
-//6 - reserved
+//5 - Get ID message
+//6 - Get UserData message
 //7 - reserved
 //8 - Join message
 //9 - Disconnect message

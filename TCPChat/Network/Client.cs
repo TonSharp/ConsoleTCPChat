@@ -26,7 +26,9 @@ namespace TCPChat
             {
                 Message msg;
                 Stream = client.GetStream();
+
                 InitializeUserData();
+                SendID();
 
                 while (true)
                 {
@@ -72,6 +74,12 @@ namespace TCPChat
 
                 server.BroadcastMessage(new Message(8, user), Id);
             }
+        }
+
+        void SendID()
+        {
+            Message msg = new Message(Id);
+            Stream.Write(msg.Serialize());
         }
 
         private string GetMessage()

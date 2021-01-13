@@ -13,6 +13,8 @@ namespace TCPChat
         private static Thread ListenThread;
         private static Thread RecieveThread;
 
+        private static string id = "null";
+
         private static string host = "127.0.0.1";
         private static int port = 23;
         private static TcpClient client;
@@ -77,6 +79,8 @@ namespace TCPChat
             }
         }
 
+        //private static void GetId();
+
         private static void Main(string[] args)
         {
             Console.CancelKeyPress += ConsoleCancelKeyPressed;
@@ -116,26 +120,42 @@ namespace TCPChat
             stream.Write(data, 0, data.Length);
         }
 
+        private static string GetMessage()
+        {
+            try
+            {
+                byte[] data = new byte[128];
+                StringBuilder builder = new StringBuilder();
+                int bytes = 0;
+
+                do
+                {
+                    bytes = stream.Read(data, 0, data.Length);
+                    builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
+                } while (stream.DataAvailable);
+
+                return builder.ToString();
+            }
+            catch(Exception e)
+            {
+                cmd.WriteLine("Cant send message" + e.Message);
+                return null;
+            }
+        }
+
         private static void ReceiveMessage()
         {
+            string message;
+
             while (true)
             {
                 try
                 {
-                    byte[] data = new byte[64];
-                    StringBuilder builder = new StringBuilder();
-                    int bytes = 0;
+                    message = GetMessage();
 
-                    do
+                    if (message.Length > 0)
                     {
-                        bytes = stream.Read(data, 0, data.Length);
-                        builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
-                    }
-                    while (stream.DataAvailable);
-
-                    if (builder.ToString().Length > 0)
-                    {
-                        Message msg = new Message(Encoding.Unicode.GetBytes(builder.ToString()));
+                        Message msg = new Message(Encoding.Unicode.GetBytes(message));
                         cmd.ParseMessage(msg);
                     }
                 }
