@@ -74,6 +74,8 @@ namespace TCPChat
                 Message UserDataMessage = new Message(8, user);      //Send UserData to the server
                 stream.Write(UserDataMessage.Serialize());
 
+                GetID();
+
                 RecieveMessages = true;
 
                 ReceiveThread = new Thread(new ThreadStart(ReceiveMessage));
@@ -224,6 +226,14 @@ namespace TCPChat
             {
                 cmd.WriteLine("Can't send message from the server: " + e.Message);
             }
+        }
+
+        private void GetID()
+        {
+            Message msg = new Message(GetMessage());
+
+            this.id = msg.message;
+            cmd.WriteLine(id);
         }
 
         private void DisconnectClient()

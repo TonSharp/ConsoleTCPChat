@@ -78,7 +78,7 @@ namespace TCPChat
 
         void SendID()
         {
-            Message msg = new Message(Id);
+            Message msg = new Message(11, Id);
             Stream.Write(msg.Serialize());
         }
 

@@ -52,17 +52,18 @@ namespace TCPChat
         }
 
         /// <summary>
-        /// Use this only for sending id from server
+        /// Use this from getting or setting user parametres
         /// </summary>
-        /// <param name="id">client id from the server</param>
-        public Message(string id)
+        /// <param name="PostCode"></param>
+        /// <param name="message"></param>
+        public Message(int PostCode, string message)
         {
-            this.PostCode = 5;
-            this.message = id;
+            this.PostCode = PostCode;
+            this.message = message;
         }
 
         /// <summary>
-        /// Use this only for messages from server
+        /// Use this only for sending events from server
         /// </summary>
         /// <param name="PostCode"></param>
         public Message(int PostCode)
@@ -104,10 +105,9 @@ namespace TCPChat
                         return Data;
                     }
 
-                case 5:
+                case int i when (i == 5 || i == 11):
                     {
                         messageData = Serializer.SerializeString(message);
-
                         Data = new byte[sizeof(int) + messageData.Length];
 
                         using (MemoryStream stream = new MemoryStream(Data))
@@ -173,7 +173,7 @@ namespace TCPChat
                             break;
                         }
 
-                    case 5:
+                    case int i when (i == 5 || i == 11):
                         {
                             messageData = Serializer.CopyFrom(data, sizeof(int));
 
@@ -205,8 +205,8 @@ namespace TCPChat
 //8 - Join message
 //9 - Disconnect message
 //10 - Server Disconnect message
-//11 - Send admin command
-//12 - Send server command
+//11 - Send ID from server message
+//12 - Send UserData from server message
 //13 - reserved
 //14 - reserved
 //15 - reserved
