@@ -11,6 +11,7 @@ namespace TCPChat
 
         private static void Main(string[] args)
         {
+            Console.OutputEncoding = Encoding.Unicode;
             network = new Network();
 
             while (true)
