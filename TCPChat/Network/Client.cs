@@ -40,7 +40,11 @@ namespace TCPChat
                             msg = new Message(Encoding.Unicode.GetBytes(message));
                             if (msg.PostCode != 8 && msg.message != "")
                             {
-                                server.BroadcastMessage(msg, Id);
+                                if(msg.PostCode == 9)
+                                {
+                                    server.BroadcastMessage(msg, Id);
+                                    server.RemoveConnection(Id);
+                                }
                             }
                         }
                     }

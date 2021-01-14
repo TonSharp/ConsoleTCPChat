@@ -14,8 +14,6 @@ namespace TCPChat
         private readonly CMD LocalCMD;
         private readonly int port;
 
-        private bool isListen = true;
-
         public Server(CMD cmd, int port)
         {
             LocalCMD = cmd;
@@ -38,33 +36,38 @@ namespace TCPChat
         {
             try
             {
-                tcpListener = new TcpListener(IPAddress.Any, port);
-                tcpListener.Start();
-                LocalCMD.WriteLine("Server started, waiting for connections...");
-                LocalCMD.SwitchToPrompt();
+                    tcpListener = new TcpListener(IPAddress.Any, port);
+                    tcpListener.Start();
+                    LocalCMD.WriteLine("Server started, waiting for connections...");
+                    LocalCMD.SwitchToPrompt();
 
-                TcpClient tcpClient = tcpListener.AcceptTcpClient();
-                Client clientObject = new Client(tcpClient, this);
+                while (true)
+                {
+                    TcpClient tcpClient = tcpListener.AcceptTcpClient();
+                    Client clientObject = new Client(tcpClient, this);
 
-                Thread clientThread = new Thread(new ThreadStart(clientObject.Process));
-                clientThread.Start();
+                    Thread clientThread = new Thread(new ThreadStart(clientObject.Process));
+                    clientThread.Start();
+                }
             }
+            catch (System.Net.Sockets.SocketException) { return; }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                LocalCMD.WriteLine(ex.Message);
                 Disconnect();
             }
         }
 
-        private User GetUser(byte[] data)
-        {
-            Message message = new Message(data);
-
-            return message.Sender;
-        }
-
         protected internal void BroadcastMessage(Message msg, string id)
         {
+            switch(msg.PostCode)
+            {
+                case int i when (i >= 1 && i <= 4):
+                    {
+
+                        break;
+                    }
+            }
             byte[] data = msg.Serialize();
             LocalCMD.ParseMessage(msg);
             if (msg.PostCode == 9) RemoveConnection(id);
@@ -84,11 +87,10 @@ namespace TCPChat
             }
         }
 
-        //TODO:
-        //1. Send message about closing
         protected internal void Disconnect()
         {
             Message msg;
+
             tcpListener.Stop();
             LocalCMD.WriteLine("Server was stoped");
 
