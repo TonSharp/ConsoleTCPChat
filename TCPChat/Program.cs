@@ -22,6 +22,8 @@ namespace TCPChat
         private static bool isConnected = false;
         private static bool isServer = false;
 
+        private static Network network;
+
         private static void RegisterUser()
         {
             Console.Write("Enter your name: ");
@@ -79,17 +81,14 @@ namespace TCPChat
             }
         }
 
-        //private static void GetId();
-
         private static void Main(string[] args)
         {
             Console.CancelKeyPress += ConsoleCancelKeyPressed;
-            cmd = new CMD();
-            RegisterUser();
+            network = new Network();
 
             while (true)
             {
-                ParseCommand(cmd.ReadLine());
+                network.Process();
             }
         }
 

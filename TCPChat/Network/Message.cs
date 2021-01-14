@@ -62,6 +62,15 @@ namespace TCPChat
         }
 
         /// <summary>
+        /// Use this only for messages from server
+        /// </summary>
+        /// <param name="PostCode"></param>
+        public Message(int PostCode)
+        {
+            this.PostCode = PostCode;
+        }
+
+        /// <summary>
         /// Use this only for Deserialization
         /// </summary>
         public Message(byte[] data)
@@ -127,6 +136,19 @@ namespace TCPChat
                         return Data;
                     }
 
+                case 10:                                                            //Server disconnect message
+                    {
+                        Data = new byte[sizeof(int)];
+                        
+                        using(MemoryStream stream = new MemoryStream(Data))
+                        {
+                            BinaryWriter writer = new BinaryWriter(stream);
+                            writer.Write(PostCode);
+                        }
+
+                        return Data;
+                    }
+
                 default: return null;
             }
         }
@@ -182,7 +204,7 @@ namespace TCPChat
 //7 - reserved
 //8 - Join message
 //9 - Disconnect message
-//10 - Send user command
+//10 - Server Disconnect message
 //11 - Send admin command
 //12 - Send server command
 //13 - reserved

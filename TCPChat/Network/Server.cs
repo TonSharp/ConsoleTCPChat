@@ -14,6 +14,8 @@ namespace TCPChat
         private readonly CMD LocalCMD;
         private readonly int port;
 
+        private bool isListen = true;
+
         public Server(CMD cmd, int port)
         {
             LocalCMD = cmd;
@@ -41,14 +43,11 @@ namespace TCPChat
                 LocalCMD.WriteLine("Server started, waiting for connections...");
                 LocalCMD.SwitchToPrompt();
 
-                while (true)
-                {
-                    TcpClient tcpClient = tcpListener.AcceptTcpClient();
-                    Client clientObject = new Client(tcpClient, this);
+                TcpClient tcpClient = tcpListener.AcceptTcpClient();
+                Client clientObject = new Client(tcpClient, this);
 
-                    Thread clientThread = new Thread(new ThreadStart(clientObject.Process));
-                    clientThread.Start();
-                }
+                Thread clientThread = new Thread(new ThreadStart(clientObject.Process));
+                clientThread.Start();
             }
             catch (Exception ex)
             {
@@ -85,12 +84,18 @@ namespace TCPChat
             }
         }
 
+        //TODO:
+        //1. Send message about closing
         protected internal void Disconnect()
         {
+            Message msg;
             tcpListener.Stop();
+            LocalCMD.WriteLine("Server was stoped");
 
             for (int i = 0; i < clients.Count; i++)
             {
+                msg = new Message(10);                      //Closing message
+                clients[i].Stream.Write(msg.Serialize());
                 clients[i].Close();
             }
         }
