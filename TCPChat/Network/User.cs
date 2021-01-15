@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.IO;
 
 namespace TCPChat
@@ -7,7 +8,13 @@ namespace TCPChat
     {
         private int userDataSize
         {
-            get => Serializer.GetStringDataSize(UserName, Color.ToString());
+            get
+            {
+                int size = Serializer.GetStringDataSize(UserName);
+                size += sizeof(int); //ARGB Color
+
+                return size;
+            }
         }
 
         public string UserName
@@ -15,7 +22,7 @@ namespace TCPChat
             get;
             private set;
         }
-        public ConsoleColor Color
+        public Color Color
         {
             get;
             private set;
@@ -23,7 +30,7 @@ namespace TCPChat
 
 
 
-        public User(string Name, ConsoleColor Color)
+        public User(string Name, Color Color)
         {
             UserName = Name;
             this.Color = Color;
@@ -34,37 +41,31 @@ namespace TCPChat
         /// </summary>
         /// <param name="Data">Data that begins from UserData</param>
         /// <param name="OtherData">Data that lefts after UserData, such as message, command or file data</param>
-        public User(byte[] Data, out byte[] OtherData)
+        public User(byte[] Data, out byte[] OtherData)                 //Rewrite without deserialize
         {
-            string[] userDataStrings = Serializer.DeserializeString(Data, 2, out OtherData);
-
-            UserName = userDataStrings[0];
-            Color = ColorParser.GetColorFromString(userDataStrings[1]);
+            Deserialize(Data, out OtherData);
         }
 
         /// <summary>
         /// Use this only for deserialization
         /// </summary>
         /// <param name="Data">Data that begins from UserData</param>
-        public User(byte[] Data)
+        public User(byte[] Data)                                       //Rewrite without deserialize
         {
-            string[] userDataStrings = Serializer.DeserializeString(Data, 2);
-
-            UserName = userDataStrings[0];
-            Color = ColorParser.GetColorFromString(userDataStrings[1]);
+            Deserialize(Data, out byte[] empty);
         }
 
         public void Deserialize(byte[] Data, out byte[] OtherData)
         {
             byte[] userData = new byte[userDataSize];
-            byte[] otherData;
+            byte[] colorData;
 
             OtherData = Serializer.CopyFrom(Data, userDataSize);
 
-            string[] userDataStrings = Serializer.DeserializeString(userData, 2, out otherData);
+            string[] userDataStrings = Serializer.DeserializeString(userData, 1, out colorData);
 
             UserName = userDataStrings[0];
-            Color = ColorParser.GetColorFromString(userDataStrings[1]);
+            Color = Color.FromArgb(Convert.ToInt32(colorData));
         }
 
         public byte[] Serialize()
@@ -75,7 +76,8 @@ namespace TCPChat
             {
                 BinaryWriter writer = new BinaryWriter(stream);
 
-                writer.Write(Serializer.SerializeString(UserName, Color.ToString()));
+                writer.Write(Serializer.SerializeString(UserName));
+                writer.Write(Color.ToArgb());
             }
 
             return data;

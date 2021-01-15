@@ -1,14 +1,14 @@
 ﻿using System;
+using System.Drawing;
 
 namespace TCPChat
 {
     public static class ColorParser
     {
-        public static ConsoleColor GetColorFromString(string color)
+        public static Color GetColorFromString(string color)
         {
-            ConsoleColor consoleColor;
-            Enum.TryParse(color, true, out consoleColor);
-            if (consoleColor == ConsoleColor.Black) consoleColor = ConsoleColor.White;
+            Color consoleColor = Color.FromName(color);
+            if (consoleColor == Color.Black) consoleColor = Color.White;
 
             return consoleColor;
         }

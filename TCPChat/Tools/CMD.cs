@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using Console = Colorful.Console;
 
 namespace TCPChat
 {
@@ -32,13 +33,13 @@ namespace TCPChat
             currentPromptPos.X = Console.CursorLeft;
             currentPromptPos.Y = promptPos.Y;
 
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.ForegroundColor = Color.White;
             Console.CursorTop = messagePos.Y;
             Console.WriteLine(message);
             messagePos.Y++;
         }
 
-        public void Write<T>(T message, ConsoleColor Color)
+        public void Write<T>(T message, Color Color)
         {
             currentPromptPos.X = Console.CursorLeft;
             currentPromptPos.Y = promptPos.Y;
@@ -46,7 +47,7 @@ namespace TCPChat
             Console.ForegroundColor = Color;
             Console.CursorTop = messagePos.Y;
             Console.WriteLine(message);
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.ForegroundColor = Color.White;
             messagePos.Y++;
         }
 
@@ -55,13 +56,13 @@ namespace TCPChat
             currentPromptPos.X = Console.CursorLeft;
             currentPromptPos.Y = promptPos.Y;
 
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.ForegroundColor = Color.White;
             Console.SetCursorPosition(messagePos.X, messagePos.Y);
             Console.WriteLine(message);
             messagePos.Y++;
         }
 
-        public void WriteLine<T>(T message, ConsoleColor Color)
+        public void WriteLine<T>(T message, Color Color)
         {
             currentPromptPos.X = Console.CursorLeft;
             currentPromptPos.Y = promptPos.Y;
@@ -69,7 +70,7 @@ namespace TCPChat
             Console.ForegroundColor = Color;
             Console.SetCursorPosition(messagePos.X, messagePos.Y);
             Console.WriteLine(message);
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.ForegroundColor = Color.White;
             messagePos.Y++;
         }
 
@@ -81,7 +82,7 @@ namespace TCPChat
             Console.ForegroundColor = Sender.Color;
             Console.SetCursorPosition(messagePos.X, messagePos.Y);
             Console.Write(Sender.UserName + ": ");
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.ForegroundColor = Color.White;
             Console.WriteLine(message);
             messagePos.Y++;
         }
@@ -94,7 +95,7 @@ namespace TCPChat
             Console.ForegroundColor = Sender.Color;
             Console.SetCursorPosition(messagePos.X, messagePos.Y);
             Console.Write(Sender.UserName);
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.ForegroundColor = Color.White;
             Console.WriteLine(" " + str);
             messagePos.Y++;
         }
