@@ -43,7 +43,21 @@ namespace TCPChat
         /// <param name="OtherData">Data that lefts after UserData, such as message, command or file data</param>
         public User(byte[] Data, out byte[] OtherData)                 //Rewrite without deserialize
         {
-            Deserialize(Data, out OtherData);
+            int userDataSize;
+            byte[] colorData;
+
+            UserName = Serializer.DeserializeString(Data, 1)[0];
+            userDataSize = Serializer.GetStringDataSize(UserName);
+            colorData = Serializer.CopyFrom(Data, userDataSize);
+
+            using (MemoryStream stream = new MemoryStream(colorData))
+            {
+                BinaryReader reader = new BinaryReader(stream);
+                Color = Color.FromArgb(reader.ReadInt32());
+                userDataSize += sizeof(int);
+            }
+
+            OtherData = Serializer.CopyFrom(Data, userDataSize);
         }
 
         /// <summary>
@@ -52,7 +66,20 @@ namespace TCPChat
         /// <param name="Data">Data that begins from UserData</param>
         public User(byte[] Data)                                       //Rewrite without deserialize
         {
-            Deserialize(Data, out byte[] empty);
+            int nameDataSize;
+            byte[] colorData;
+
+            UserName = Serializer.DeserializeString(Data, 1)[0];
+            nameDataSize = Serializer.GetStringDataSize(UserName);
+
+            colorData = Serializer.CopyFrom(Data, nameDataSize);
+
+            using(MemoryStream stream = new MemoryStream(colorData))
+            {
+                BinaryReader reader = new BinaryReader(stream);
+
+                Color = Color.FromArgb(reader.ReadInt32());
+            }
         }
 
         public void Deserialize(byte[] Data, out byte[] OtherData)
