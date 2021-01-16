@@ -367,8 +367,11 @@ namespace TCPChat
                                 {
                                     user.SetColor(ColorParser.GetColorFromString(args[1]));
 
-                                    Message update = new Message(7, user);
-                                    SendMessage(update);
+                                    if (isConnected)
+                                    {
+                                        Message update = new Message(7, user);
+                                        SendMessage(update);
+                                    }
                                 }
 
                                 break;
