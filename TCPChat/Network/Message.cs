@@ -38,17 +38,14 @@ namespace TCPChat
         }
 
         /// <summary>
-        /// Use this only for Connect or Disconnect
+        /// Use this only for Connect or Disconnect or Updating UserData on Server
         /// </summary>
-        /// <param name="PostCode">8 or 9</param>
-        /// <param name="Sender">Who connected/disconnected?</param>
+        /// <param name="PostCode">8 or 9, 7</param>
+        /// <param name="Sender">Who connected/disconnected, updating</param>
         public Message(int PostCode, User Sender)
         {
-            if (PostCode == 8 || PostCode == 9)
-            {
-                this.PostCode = PostCode;
-                this.Sender = Sender;
-            }
+            this.PostCode = PostCode;
+            this.Sender = Sender;
         }
 
         /// <summary>
@@ -120,7 +117,7 @@ namespace TCPChat
                         return Data;
                     }
 
-                case int i when (i >= 8 && i <= 9):
+                case int i when (i >= 7 && i <= 9):
                     {
                         userData = Sender.Serialize();
 
@@ -181,7 +178,7 @@ namespace TCPChat
                             break;
                         }
 
-                    case int i when (i >= 8 && i <= 9):
+                    case int i when (i >= 7 && i <= 9):
                         {
                             userData = Serializer.CopyFrom(data, sizeof(int));
                             Sender = new User(userData);
@@ -201,7 +198,7 @@ namespace TCPChat
 //4 - Send notification message
 //5 - Get ID message
 //6 - Get UserData message
-//7 - reserved
+//7 - Send userData message
 //8 - Join message
 //9 - Disconnect message
 //10 - Server Disconnect message

@@ -60,17 +60,9 @@ namespace TCPChat
 
         protected internal void BroadcastMessage(Message msg, string id)
         {
-            switch(msg.PostCode)
-            {
-                case int i when (i >= 1 && i <= 4):
-                    {
-
-                        break;
-                    }
-            }
             byte[] data = msg.Serialize();
             LocalCMD.ParseMessage(msg);
-            if (msg.PostCode == 9) RemoveConnection(id);
+
             for (int i = 0; i < clients.Count; i++)
             {
                 if (clients[i].Id != id)

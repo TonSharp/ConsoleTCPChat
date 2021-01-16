@@ -366,6 +366,9 @@ namespace TCPChat
                                 if (args[1][0] != '#')
                                 {
                                     user.SetColor(ColorParser.GetColorFromString(args[1]));
+
+                                    Message update = new Message(7, user);
+                                    SendMessage(update);
                                 }
 
                                 break;

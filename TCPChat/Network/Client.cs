@@ -40,13 +40,29 @@ namespace TCPChat
                         if (message.Length > 0)
                         {
                             msg = new Message(Encoding.Unicode.GetBytes(message));
-                            if (msg.PostCode != 8 && msg.message != "")
+
+                            switch(msg.PostCode)
                             {
-                                if(msg.PostCode == 9)
-                                {
-                                    server.BroadcastMessage(msg, Id);
-                                    server.RemoveConnection(Id);
-                                }
+                                case int i when (i >= 1 && i <= 4):
+                                    {
+                                        server.BroadcastMessage(msg, Id);
+                                        break;
+                                    }
+                                case 7:                                         //if client updates his UserData
+                                    {
+                                        user = new User(msg.Sender.UserName, msg.Sender.Color);
+                                        continue;
+                                    }
+                                case 9:
+                                    {
+                                        server.BroadcastMessage(msg, Id);
+                                        server.RemoveConnection(Id);
+                                        break;
+                                    }
+                                default:
+                                    {
+                                        continue;
+                                    }
                             }
                         }
                     }
