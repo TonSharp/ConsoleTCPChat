@@ -28,7 +28,10 @@ namespace TCPChat
             private set;
         }
 
-
+        public void SetColor(Color color)
+        {
+            Color = color;
+        }
 
         public User(string Name, Color Color)
         {

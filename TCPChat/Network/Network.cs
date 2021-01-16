@@ -358,6 +358,20 @@ namespace TCPChat
                             }
                             break;
                         }
+
+                    case string s when (s == "color"):
+                        {
+                            if (args.Length == 2)
+                            {
+                                if (args[1][0] != '#')
+                                {
+                                    user.SetColor(ColorParser.GetColorFromString(args[1]));
+                                }
+
+                                break;
+                            }
+                            else return;
+                        }
                 }
             }
         }

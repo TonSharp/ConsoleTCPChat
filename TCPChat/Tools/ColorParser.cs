@@ -7,10 +7,18 @@ namespace TCPChat
     {
         public static Color GetColorFromString(string color)
         {
-            Color consoleColor = Color.FromName(color);
-            if (consoleColor == Color.Black) consoleColor = Color.White;
+            try
+            {
+                KnownColor knownColor = Enum.Parse<KnownColor>(color, true);
+                Color consoleColor = Color.FromKnownColor(knownColor);
+                if (consoleColor == Color.Black) consoleColor = Color.White;
 
-            return consoleColor;
+                return consoleColor;
+            }
+            catch
+            {
+                return Color.White;
+            }
         }
     }
 }
