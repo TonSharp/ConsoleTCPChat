@@ -7,12 +7,12 @@ namespace TCPChat
 {
     internal class Program
     {
-        private static Network network;
+        private static NetworkManager network;
 
         private static void Main(string[] args)
         {
             Console.OutputEncoding = Encoding.Unicode;
-            network = new Network();
+            network = new NetworkManager();
 
             string name = "";
             string color = "";
@@ -23,9 +23,9 @@ namespace TCPChat
             bool StartServer = false;
             bool StartClient = false;
 
-            if (args.Length > 0)
+            if (args.Length > 0)                //Check for console options
             {
-                for (int i = 0; i < args.Length - 1; i++)
+                for (int i = 0; i < args.Length - 1; i++)       
                 {
                     string arg = args[i];
 
@@ -33,9 +33,9 @@ namespace TCPChat
                     {
                         case string s when (s == "-N" || s == "--name"):
                             {
-                                if (i + 1 < args.Length)
+                                if (i + 1 < args.Length)        //If after option we have argument
                                 {
-                                    name = args[i + 1];
+                                    name = args[i + 1];         //Set up it
                                     i++;
 
                                     continue;
@@ -70,22 +70,22 @@ namespace TCPChat
                             {
                                 if (i + 1 < args.Length)
                                 {
-                                    if (args[i + 1].Contains(':'))
+                                    if (args[i + 1].Contains(':'))                  //If host and port in format [host:port]
                                     {
-                                        string[] HostArgs = args[i + 1].Split(':');
+                                        string[] HostArgs = args[i + 1].Split(':'); //Split it
 
                                         host = HostArgs[0];
-                                        Int32.TryParse(HostArgs[1], out port);
+                                        Int32.TryParse(HostArgs[1], out port);      //And convert
 
                                         i++;
 
                                         StartServer = false;
                                         StartClient = true;
                                     }
-                                    else if (i + 2 < args.Length)
+                                    else if (i + 2 < args.Length)                   //If there is 2 arguments and format [host] [port]
                                     {
                                         host = args[i + 1];
-                                        Int32.TryParse(args[i + 2], out port);
+                                        Int32.TryParse(args[i + 2], out port);      //Convert it
                                         i += 2;
 
                                         continue;
@@ -97,33 +97,33 @@ namespace TCPChat
                     }
                 }
 
-                if (color.Length > 0 && name.Length > 0)
+                if (color.Length > 0 && name.Length > 0)                            //If color and name are specified then
                 {
-                    network.user = new User(name, ColorParser.GetColorFromString(color));
+                    network.user = new User(name, ColorParser.GetColorFromString(color)); //Set up user
                 }
-                else network.RegisterUser();
+                else network.RegisterUser();                                        //Or register him
 
-                if (host.Length > 0 && port > 0 && StartClient && !StartServer)
+                if (host.Length > 0 && port > 0 && StartClient && !StartServer)     //If host and port are specified and this is client
                 {
                     network.host = host;
                     network.port = port;
 
-                    network.StartClient();
+                    network.StartClient();                      //then start client
                 }
-                if (port > 0 && StartServer && !StartClient)
+                if (port > 0 && StartServer && !StartClient)    //If port specified and this is server
                 {
                     network.port = port;
 
-                    network.StartServer();
+                    network.StartServer();                      //Start server
                 }
 
             }
 
-            else network.RegisterUser();
+            else network.RegisterUser();                //If there are no commands, register user
 
             while (true)
             {
-                network.Process();
+                network.Process();                      //Starts manager
             }
         }
     }

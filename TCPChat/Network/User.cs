@@ -40,18 +40,18 @@ namespace TCPChat
         }
 
         /// <summary>
-        /// Use this only for deserialization
+        /// Use this only for deserialization. Creates user based on Serialized UserData
         /// </summary>
         /// <param name="Data">Data that begins from UserData</param>
-        /// <param name="OtherData">Data that lefts after UserData, such as message, command or file data</param>
+        /// <param name="OtherData">Remaining data afer UserData</param>
         public User(byte[] Data, out byte[] OtherData)                 //Rewrite without deserialize
         {
             int userDataSize;
             byte[] colorData;
 
-            UserName = Serializer.DeserializeString(Data, 1)[0];
+            UserName = Serializer.DeserializeString(Data, 1)[0];        //Deserialize UserName
             userDataSize = Serializer.GetStringDataSize(UserName);
-            colorData = Serializer.CopyFrom(Data, userDataSize);
+            colorData = Serializer.CopyFrom(Data, userDataSize);        //Copy colorData from Data
 
             using (MemoryStream stream = new MemoryStream(colorData))
             {
@@ -60,11 +60,11 @@ namespace TCPChat
                 userDataSize += sizeof(int);
             }
 
-            OtherData = Serializer.CopyFrom(Data, userDataSize);
+            OtherData = Serializer.CopyFrom(Data, userDataSize);        
         }
 
         /// <summary>
-        /// Use this only for deserialization
+        /// Use this only for deserialization. Creates user based on Serialized UserData
         /// </summary>
         /// <param name="Data">Data that begins from UserData</param>
         public User(byte[] Data)                                       //Rewrite without deserialize
@@ -85,6 +85,11 @@ namespace TCPChat
             }
         }
 
+        /// <summary>
+        /// Deserialize data based on usedDataSize
+        /// </summary>
+        /// <param name="Data">Data for deserialization</param>
+        /// <param name="OtherData">Remaining data after UserData</param>
         public void Deserialize(byte[] Data, out byte[] OtherData)
         {
             byte[] userData = new byte[userDataSize];
@@ -98,6 +103,10 @@ namespace TCPChat
             Color = Color.FromArgb(Convert.ToInt32(colorData));
         }
 
+        /// <summary>
+        /// Serialize UserData
+        /// </summary>
+        /// <returns>Serialized byte array</returns>
         public byte[] Serialize()
         {
             byte[] data = new byte[userDataSize];

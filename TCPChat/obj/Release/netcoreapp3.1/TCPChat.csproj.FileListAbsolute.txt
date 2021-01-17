@@ -11,3 +11,5 @@ D:\Projects\CS\TCPChat\TCPChat\obj\Release\netcoreapp3.1\TCPChat.dll
 D:\Projects\CS\TCPChat\TCPChat\obj\Release\netcoreapp3.1\TCPChat.pdb
 D:\Projects\CS\TCPChat\TCPChat\obj\Release\netcoreapp3.1\TCPChat.genruntimeconfig.cache
 D:\Projects\CS\TCPChat\TCPChat\obj\Release\netcoreapp3.1\TCPChat.csprojAssemblyReference.cache
+D:\Projects\CS\TCPChat\TCPChat\bin\Release\netcoreapp3.1\Colorful.Console.dll
+D:\Projects\CS\TCPChat\TCPChat\obj\Release\netcoreapp3.1\TCPChat.csproj.CopyComplete

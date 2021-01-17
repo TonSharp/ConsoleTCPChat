@@ -84,12 +84,12 @@ namespace TCPChat
 
             switch(PostCode)
             {
-                case int i when (i >= 1 && i <= 4):
+                case int i when (i >= 1 && i <= 4):             //If we send message
                     {
                         userData = Sender.Serialize();
                         messageData = Serializer.SerializeString(message);
 
-                        Data = new byte[sizeof(int) + userData.Length + messageData.Length];
+                        Data = new byte[sizeof(int) + userData.Length + messageData.Length];    //Size of PostCode + userData + MessageData
 
                         using (MemoryStream stream = new MemoryStream(Data))
                         {
@@ -102,10 +102,10 @@ namespace TCPChat
                         return Data;
                     }
 
-                case int i when (i == 5 || i == 11):
+                case int i when (i == 5 || i == 11):                        //If we sends or request ID
                     {
                         messageData = Serializer.SerializeString(message);
-                        Data = new byte[sizeof(int) + messageData.Length];
+                        Data = new byte[sizeof(int) + messageData.Length];  //Size of PostCode + ID
 
                         using (MemoryStream stream = new MemoryStream(Data))
                         {
@@ -117,7 +117,7 @@ namespace TCPChat
                         return Data;
                     }
 
-                case int i when (i >= 7 && i <= 9):
+                case int i when (i >= 7 && i <= 9):                         //If Update userData or Joining/Disconnecting
                     {
                         userData = Sender.Serialize();
 
@@ -156,12 +156,12 @@ namespace TCPChat
 
             using (MemoryStream stream = new MemoryStream(data))
             {
-                BinaryReader reader = new BinaryReader(stream);
+                BinaryReader reader = new BinaryReader(stream);                 //Firstly lets read PostCode
                 PostCode = reader.ReadInt32();
 
-                switch(PostCode)
+                switch(PostCode)                                                //Then lets deserialize based on PostCode
                 {
-                    case int i when (i >= 1 && i <= 4):
+                    case int i when (i >= 1 && i <= 4):                         //If its usual message
                         {
                             userData = Serializer.CopyFrom(data, sizeof(int));
                             Sender = new User(userData, out messageData);
@@ -170,7 +170,7 @@ namespace TCPChat
                             break;
                         }
 
-                    case int i when (i == 5 || i == 11):
+                    case int i when (i == 5 || i == 11):                        //If we sends or request ID
                         {
                             messageData = Serializer.CopyFrom(data, sizeof(int));
 
@@ -178,7 +178,7 @@ namespace TCPChat
                             break;
                         }
 
-                    case int i when (i >= 7 && i <= 9):
+                    case int i when (i >= 7 && i <= 9):                         //If we updating UserData or Joining/Disconnecting
                         {
                             userData = Serializer.CopyFrom(data, sizeof(int));
                             Sender = new User(userData);

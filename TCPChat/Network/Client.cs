@@ -14,7 +14,7 @@ namespace TCPChat
 
         public Client(TcpClient tcpClient, Server serverObject)
         {
-            Id = Guid.NewGuid().ToString();
+            Id = Guid.NewGuid().ToString();                     //Generate new unigue ID
             client = tcpClient;
             server = serverObject;
             serverObject.AddConnection(this);
@@ -25,36 +25,36 @@ namespace TCPChat
             try
             {
                 Message msg;
-                Stream = client.GetStream();
-
-                InitializeUserData();
-                SendID();
+                Stream = client.GetStream();    //Gets stream
+                    
+                InitializeUserData();           //Gets userData
+                SendID();                       //Sends ID, Oddly enough)
 
                 while (true)
                 {
                     try
                     {
-                        string message = GetMessage();
-                        if (message.Length > 0)
+                        string message = GetMessage();  //While stream is available lets read stream
+                        if (message.Length > 0)         //If message is not empty
                         {
-                            msg = new Message(Encoding.Unicode.GetBytes(message));
+                            msg = new Message(Encoding.Unicode.GetBytes(message));  //Lets parse it
 
                             switch(msg.PostCode)
                             {
                                 case int i when (i >= 1 && i <= 4):
                                     {
-                                        server.BroadcastMessage(msg, Id);
+                                        server.BroadcastMessage(msg, Id);   //If this is regular message then broadcast it
                                         break;
                                     }
                                 case 7:                                         //if client updates his UserData
                                     {
-                                        user = new User(msg.Sender.UserName, msg.Sender.Color);
+                                        user = new User(msg.Sender.UserName, msg.Sender.Color); //Update UserData on server
                                         continue;
                                     }
-                                case 9:
+                                case 9:                                     //If user Disconnecting
                                     {
-                                        server.BroadcastMessage(msg, Id);
-                                        server.RemoveConnection(Id);
+                                        server.BroadcastMessage(msg, Id);   //Broadcast it
+                                        server.RemoveConnection(Id);        //And remove connection
                                         break;
                                     }
                                 default:
@@ -66,7 +66,7 @@ namespace TCPChat
                     }
                     catch
                     {
-                        Message disconnMsg = new Message(9, user);
+                        Message disconnMsg = new Message(9, user);          //If there is error, disconnect this user
                         server.BroadcastMessage(disconnMsg, Id);
                         break;
                     }

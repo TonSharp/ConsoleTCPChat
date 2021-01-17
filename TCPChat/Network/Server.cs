@@ -26,10 +26,10 @@ namespace TCPChat
         }
         protected internal void RemoveConnection(string id)
         {
-            Client client = clients.FirstOrDefault(c => c.Id == id);
+            Client client = clients.FirstOrDefault(c => c.Id == id);    //Pick client with specified ID
 
-            if (client != null)
-                clients.Remove(client);
+            if (client != null)                     //If its exist
+                clients.Remove(client);             //Remove connection
         }
 
         protected internal void Listen()
@@ -43,10 +43,10 @@ namespace TCPChat
 
                 while (true)
                 {
-                    TcpClient tcpClient = tcpListener.AcceptTcpClient();
-                    Client clientObject = new Client(tcpClient, this);
+                    TcpClient tcpClient = tcpListener.AcceptTcpClient();        //If we get a new connection
+                    Client clientObject = new Client(tcpClient, this);          //Lets create new client
 
-                    Thread clientThread = new Thread(new ThreadStart(clientObject.Process));
+                    Thread clientThread = new Thread(new ThreadStart(clientObject.Process));    //And start new thread
                     clientThread.Start();
                 }
             }
@@ -61,12 +61,12 @@ namespace TCPChat
         protected internal void BroadcastMessage(Message msg, string id)
         {
             byte[] data = msg.Serialize();
-            LocalCMD.ParseMessage(msg);
+            LocalCMD.ParseMessage(msg);                 //If we want to broadcast message, lets write it in the server
 
             for (int i = 0; i < clients.Count; i++)
             {
                 if (clients[i].Id != id)
-                    clients[i].Stream.Write(data, 0, data.Length);
+                    clients[i].Stream.Write(data, 0, data.Length);  //And then if it isn a sender, send rhis message to client
             }
         }
 
@@ -75,7 +75,7 @@ namespace TCPChat
             byte[] data = msg.Serialize();
             for (int i = 0; i < clients.Count; i++)
             {
-                clients[i].Stream.Write(data, 0, data.Length);
+                clients[i].Stream.Write(data, 0, data.Length);  //Send this message for all clients
             }
         }
 
@@ -88,9 +88,9 @@ namespace TCPChat
 
             for (int i = 0; i < clients.Count; i++)
             {
-                msg = new Message(10);                      //Closing message
+                msg = new Message(10);                      //Send closing message to clients
                 clients[i].Stream.Write(msg.Serialize());
-                clients[i].Close();
+                clients[i].Close();                         //And then close connection
             }
         }
     }

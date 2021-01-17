@@ -6,6 +6,12 @@ namespace TCPChat
 {
     public static class Serializer
     {
+        /// <summary>
+        /// Copy part of StartData starting and specified index
+        /// </summary>
+        /// <param name="StartData">Origin</param>
+        /// <param name="MoveFrom">Starting index copy from</param>
+        /// <returns>New copied byte array</returns>
         public static byte[] CopyFrom(byte[] StartData, int MoveFrom)
         {
             byte[] MovedData = new byte[StartData.Length - MoveFrom];
@@ -26,6 +32,12 @@ namespace TCPChat
             return MovedData;
         }
 
+        /// <summary>
+        /// Joining two bytes array into one
+        /// </summary>
+        /// <param name="data1"></param>
+        /// <param name="data2"></param>
+        /// <returns>Merged data1 + data2</returns>
         public static byte[] JoinBytes(byte[] data1, byte[] data2)
         {
             byte[] ExpandedData = new byte[data1.Length + data2.Length];
@@ -36,6 +48,11 @@ namespace TCPChat
             return ExpandedData;
         }
 
+        /// <summary>
+        /// Get string data size based on its size (sizeof(int) = 4) + string length * sizeof(char)
+        /// </summary>
+        /// <param name="str">string or array of strings</param>
+        /// <returns>Serialized strings size</returns>
         public static int GetStringDataSize(params string[] str)
         {
             int size = 0;
@@ -49,6 +66,11 @@ namespace TCPChat
             return size;
         }
 
+        /// <summary>
+        /// Serialaizes string or string array and reurns byte array
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns>Serialized string or strings array</returns>
         public static byte[] SerializeString(params string[] str)
         {
             byte[] data = new byte[GetStringDataSize(str)];
@@ -67,6 +89,11 @@ namespace TCPChat
             return data;
         }
 
+        /// <summary>
+        /// Deserialized string (!!!Important!!! The size of the data must not exceed the size of the rows)
+        /// </summary>
+        /// <param name="data">Serialized string data</param>
+        /// <returns>Deserialized string or string array</returns>
         public static string[] DeserializeString(byte[] data)
         {
             List<string> deserialized = new List<string>();
@@ -88,6 +115,12 @@ namespace TCPChat
             return deserialized.ToArray();
         }
 
+        /// <summary>
+        /// Deserialize strings based on ist count
+        /// </summary>
+        /// <param name="data">Seriailized data</param>
+        /// <param name="count">Number of serialized strings</param>
+        /// <returns>Deserialized string or string array</returns>
         public static string[] DeserializeString(byte[] data, int count)
         {
             string[] deserialized = new string[count];
@@ -108,6 +141,13 @@ namespace TCPChat
             return deserialized;
         }
 
+        /// <summary>
+        /// Deserialize strings based on its count and retruns string or string array
+        /// </summary>
+        /// <param name="data">Origin data</param>
+        /// <param name="count">Count of strings</param>
+        /// <param name="OtherData">Remainings data</param>
+        /// <returns>Deserialized string or string array</returns>
         public static string[] DeserializeString(byte[] data, int count, out byte[] OtherData)
         {
             string[] deserialized = new string[count];

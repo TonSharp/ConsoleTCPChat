@@ -25,6 +25,9 @@ namespace TCPChat
             }
         }
 
+        /// <summary>
+        /// Function that will be called after position will be changed
+        /// </summary>
         public event Action PositionChanged;
 
         public Vector2(int x = 0, int y = 0)
