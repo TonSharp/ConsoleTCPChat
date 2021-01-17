@@ -2,7 +2,7 @@
 
 Simple .NET Core application that allows you to communicate with other users, via the console and the **TCP** protocol. You can create a room with **any port**, or connect to an existing one.
 
-TCP Chat supports **color nicknames** (currently only available colors in the console, in the future all RGB colors), **commands** for interacting with the server and clients (in development). Many other cool features will appear in the future)
+TCP Chat supports **RGB** color **nicknames**, **commands** for interacting with the server and clients (in development), console **options**. Many other cool features will appear in the future)
 
 TCP Chat is a completely anonymous application, all you need is to enter any nickname and color.
 
@@ -40,6 +40,8 @@ In the full version of Message, the **PostCode** is followed by the public **Use
 
 Here is a list of currently available commands:
 
+### General commands
+
 |Command|Description|
 |--|--|
 |**/join** [adress]:[port]|Connect to the server|
@@ -52,3 +54,23 @@ Here is a list of currently available commands:
 |**/dconnect**|The same as /disconnect|
 |**/clear**|Clears screen|
 |**/clr**|The same as /clear|
+
+### User commands
+
+|Command|Description|
+|--|--|
+|/color [color]|Sets up user color|
+
+
+## Console Options
+
+| Option | Description |
+|--|--|
+|**-N** [name]|Sets up **UserName** (-c required)|
+|--name [name]|The same as -N|
+|**-c** [color]|Sets up user **Color** (-N required)|
+|--color|The same as -c|
+|**-S** [port]|If -N and -c seted up, starts server|
+|--server [port]|The same as -S|
+|**-C** [hostname] [port] or [hostname:port]|If -N and -c seted up, connects to the server|
+|--client [hostname] [port] or [hostname:port]|The same as -C|
