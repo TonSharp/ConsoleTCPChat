@@ -344,7 +344,7 @@ namespace TCPChat
                             {
                                 string[] data = args[1].Split(":");
                                 host = data[0];
-                                Int32.TryParse(args[2], out port);
+                                Int32.TryParse(data[1], out port);
                             }
                             else return;
 
@@ -355,7 +355,7 @@ namespace TCPChat
                         {
                             if (args.Length == 2)
                             {
-                                Int32.TryParse(args[2], out port);
+                                Int32.TryParse(args[1], out port);
                             }
                             else return;
 
