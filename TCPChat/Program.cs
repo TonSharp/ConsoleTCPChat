@@ -25,15 +25,15 @@ namespace TCPChat
 
             if (args.Length > 0)
             {
-                for(int i = 0; i < args.Length - 1; i++)
+                for (int i = 0; i < args.Length - 1; i++)
                 {
                     string arg = args[i];
 
-                    switch(arg)
+                    switch (arg)
                     {
                         case string s when (s == "-N" || s == "--name"):
                             {
-                                if(i + 1 < args.Length)
+                                if (i + 1 < args.Length)
                                 {
                                     name = args[i + 1];
                                     i++;
@@ -70,7 +70,7 @@ namespace TCPChat
                             {
                                 if (i + 1 < args.Length)
                                 {
-                                    if(args[i+1].Contains(':'))
+                                    if (args[i + 1].Contains(':'))
                                     {
                                         string[] HostArgs = args[i + 1].Split(':');
 
@@ -82,7 +82,7 @@ namespace TCPChat
                                         StartServer = false;
                                         StartClient = true;
                                     }
-                                    else if(i + 2 < args.Length)
+                                    else if (i + 2 < args.Length)
                                     {
                                         host = args[i + 1];
                                         Int32.TryParse(args[i + 2], out port);
@@ -103,14 +103,14 @@ namespace TCPChat
                 }
                 else network.RegisterUser();
 
-                if(host.Length > 0 && port > 0 && StartClient && !StartServer)
+                if (host.Length > 0 && port > 0 && StartClient && !StartServer)
                 {
                     network.host = host;
                     network.port = port;
 
                     network.StartClient();
                 }
-                if(port > 0 && StartServer && !StartClient)
+                if (port > 0 && StartServer && !StartClient)
                 {
                     network.port = port;
 
@@ -118,6 +118,8 @@ namespace TCPChat
                 }
 
             }
+
+            else network.RegisterUser();
 
             while (true)
             {

@@ -61,18 +61,17 @@ namespace TCPChat
 
             if (isServer) isServer = false;
 
-            client = new TcpClient();
-
             try
             {
-                client.Connect(host, port);
+                client = new TcpClient(host, port);
+                //client.Connect(host, port);
                 isConnected = true;
                 stream = client.GetStream();
 
-                cmd.WriteLine("Succesfully connected to the server");
-
                 Message UserDataMessage = new Message(8, user);      //Send UserData to the server
                 stream.Write(UserDataMessage.Serialize());
+
+                cmd.WriteLine("Succesfully connected to the server");
 
                 GetID();
 
@@ -250,15 +249,22 @@ namespace TCPChat
             Message msg = new Message(9, user);
             stream.Write(msg.Serialize());       //Disconnect this client from server
 
-            if (RecieveMessages) RecieveMessages = false;
+            if (RecieveMessages)
+            {
+                RecieveMessages = false;
+                ReceiveThread.Interrupt();
+                ReceiveThread = null;
+            }
             if (stream != null)
             {
                 stream.Close();
+                stream.Dispose();
                 stream = null;
             }
             if (client != null)
             {
                 client.Close();
+                client.Dispose();
                 client = null;
             }
 
@@ -320,6 +326,13 @@ namespace TCPChat
                 {
                     case string s when (s == "join" || s == "connect"):
                         {
+                            if ((client != null || stream != null) && isConnected)
+                            {
+                                cmd.WriteLine("You need to disconnect first");
+
+                                return;
+                            }
+
                             if (args.Length == 3)
                             {
                                 host = args[1];
@@ -332,11 +345,6 @@ namespace TCPChat
                                 port = Convert.ToInt32(data[1]);
                             }
                             else return;
-
-                            if ((client != null || stream != null) && isConnected)
-                            {
-                                DisconnectClient();
-                            }
 
                             StartClient();
                             break;

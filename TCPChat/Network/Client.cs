@@ -22,8 +22,6 @@ namespace TCPChat
 
         public void Process()
         {  
-            //TODO:
-            //1. Client should send information about update any userData
             try
             {
                 Message msg;
