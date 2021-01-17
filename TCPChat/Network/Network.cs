@@ -19,8 +19,8 @@ namespace TCPChat
 
         private string id = "null";
 
-        private string host = "127.0.0.1";
-        private int port = 23;
+        protected internal string host = "127.0.0.1";
+        protected internal int port = 23;
 
         private bool isConnected = false;
         private bool isServer = false;
@@ -31,18 +31,18 @@ namespace TCPChat
         public Network()
         {
             cmd = new CMD();
-            RegisterUser();
         }
 
         public void Process()
         {
-            ParseCommand(cmd.ReadLine());
+            ParseCommand(cmd.ReadLine(user.UserName));
         }
 
-        private void RegisterUser()
+        protected internal void RegisterUser()
         {
             Console.Write("Enter your name: ");
             string userName = Console.ReadLine();
+            Console.Title = userName;
 
             Console.Write("Enter your color (white): ");
             string color = Console.ReadLine();
@@ -166,7 +166,16 @@ namespace TCPChat
 
             }
             catch (System.NullReferenceException) { return null; }
-            catch (System.IO.IOException) { cmd.WriteLine("You are disconnetcted"); cmd.SwitchToPrompt(); return null; }
+
+            catch (System.IO.IOException) 
+            { 
+                cmd.WriteLine("You are disconnetcted"); 
+                cmd.SwitchToPrompt();
+                if (isConnected) DisconnectClient();
+                else if(isServer) DisconnectServer();
+                return null;
+            }
+
             catch (Exception e)
             {
                 cmd.WriteLine("Can't get message from thread: " + e.Message);
@@ -324,7 +333,11 @@ namespace TCPChat
                             }
                             else return;
 
-                            if (client != null || stream != null) SendMessage(new Message(9, user));
+                            if ((client != null || stream != null) && isConnected)
+                            {
+                                DisconnectClient();
+                            }
+
                             StartClient();
                             break;
                         }
