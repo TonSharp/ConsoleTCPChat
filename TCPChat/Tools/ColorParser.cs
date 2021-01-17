@@ -9,9 +9,18 @@ namespace TCPChat
         {
             try
             {
-                KnownColor knownColor = Enum.Parse<KnownColor>(color, true);
-                Color consoleColor = Color.FromKnownColor(knownColor);
-                if (consoleColor == Color.Black) consoleColor = Color.White;
+                Color consoleColor = Color.White;
+                if(color[0] != '#')
+                {
+                    KnownColor knownColor = Enum.Parse<KnownColor>(color, true);
+                    consoleColor = Color.FromKnownColor(knownColor);
+
+                    if (consoleColor == Color.Black) consoleColor = Color.White;
+                }
+                else if(color.Length == 7)
+                {
+                    consoleColor = System.Drawing.ColorTranslator.FromHtml(color);
+                }
 
                 return consoleColor;
             }
