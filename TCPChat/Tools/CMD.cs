@@ -100,13 +100,14 @@ namespace TCPChat
             messagePos.Y++;
         }
 
-        public string ReadLine(string Name)
+        public string ReadLine(User user)
         {
             Console.SetCursorPosition(promptPos.X, promptPos.Y);
-            Console.Write(Name + "> ");
+            Console.Write(user.UserName, user.Color);
+            Console.Write("> ", Color.White);
             string input = Console.ReadLine();
             Console.SetCursorPosition(promptPos.X, promptPos.Y);
-            Console.Write(new string(' ',Name.Length + input.Length + 2));
+            Console.Write(new string(' ',user.UserName.Length + input.Length + 2));
 
             return input;
         }

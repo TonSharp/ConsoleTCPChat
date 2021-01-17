@@ -35,7 +35,7 @@ namespace TCPChat
 
         public void Process()
         {
-            ParseCommand(cmd.ReadLine(user.UserName));
+            ParseCommand(cmd.ReadLine(user));
         }
 
         protected internal void RegisterUser()
