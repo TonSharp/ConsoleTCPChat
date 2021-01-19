@@ -13,3 +13,5 @@ D:\Projects\CS\TCPChat\TCPChat\obj\Debug\netcoreapp3.1\TCPChat.pdb
 D:\Projects\CS\TCPChat\TCPChat\obj\Debug\netcoreapp3.1\TCPChat.genruntimeconfig.cache
 D:\Projects\CS\TCPChat\TCPChat\bin\Debug\netcoreapp3.1\Colorful.Console.dll
 D:\Projects\CS\TCPChat\TCPChat\obj\Debug\netcoreapp3.1\TCPChat.csproj.CopyComplete
+D:\Projects\CS\TCPChat\TCPChat\bin\Debug\netcoreapp3.1\NAudio.dll
+D:\Projects\CS\TCPChat\TCPChat\bin\Debug\netcoreapp3.1\System.Resources.Extensions.dll

@@ -3,6 +3,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
+using TCPChat.AudioEngine;
+
 namespace TCPChat
 {
     internal class Program
@@ -11,6 +13,11 @@ namespace TCPChat
 
         private static void Main(string[] args)
         {
+            Console.ReadLine();
+
+            var Notification = new CachedSound("Notification.mp3");
+            AudioPlaybackEngine.Instance.PlaySound(Notification);
+
             Console.OutputEncoding = Encoding.Unicode;
             network = new NetworkManager();
 
