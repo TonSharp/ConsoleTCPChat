@@ -24,9 +24,9 @@ namespace TCPChat
 
         private bool isConnected = false;
         private bool isServer = false;
-        private bool RecieveMessages = false;
+        internal bool RecieveMessages = false;
 
-        private NetworkStream stream;
+        public NetworkStream stream;
 
         public NetworkManager()
         {
@@ -35,7 +35,7 @@ namespace TCPChat
 
         public void Process()
         {
-            ParseCommand(cmd.ReadLine(user));      //Always read command and parse it in main thread
+            cmd.ReadLine(user);      //Always read command and parse it in main thread
         }
 
         protected internal void RegisterUser()
@@ -52,7 +52,7 @@ namespace TCPChat
             user = new User(userName, ColorParser.GetColorFromString(color));   //Parse color from string and create user
         }
 
-        public void StartClient()
+        public bool StartClient()
         {
             if (stream != null || client != null)       //If the previous session was not closed
             {
@@ -60,7 +60,7 @@ namespace TCPChat
             }
 
             if (isServer)                               //If it was Server
-            {                     
+            {
                 DisconnectServer();                     //Close it
             }
 
@@ -81,14 +81,25 @@ namespace TCPChat
 
                 ReceiveThread = new Thread(new ThreadStart(ReceiveMessage)); //Starting receive message thread
                 ReceiveThread.Start();
+                return true;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 cmd.WriteLine("Can't connect to the server: " + e.Message);
+                return false;
             }
         }
 
-        public void StartServer()
+        public void UpdateUserData()
+        {
+            if(isConnected)
+            {
+                Message update = new Message(7, user);  //Updates userData on server
+                SendMessage(update);
+            }
+        }
+
+        public bool StartServer()
         {
             if(server != null)                  //If server was already started
             {
@@ -110,11 +121,13 @@ namespace TCPChat
                 ListenThread.Start();
 
                 isServer = true;
+
+                return true;
             }
             catch(Exception e)
             {
                 cmd.WriteLine("Can't start server: " + e.Message);
-                return;
+                return false;
             }
         }
 
@@ -185,6 +198,87 @@ namespace TCPChat
             }
         }
 
+        public Input GetInputType(string Input)
+        {
+            if (Input.Trim().Length < 1) return TCPChat.Input.Empty;
+            if (Input[0] == '/') return TCPChat.Input.Command;
+            else return TCPChat.Input.Message;
+        }
+
+        public string[] GetCommandArgs(string Input)
+        {
+            if (GetInputType(Input) == TCPChat.Input.Command)
+            {
+                string lower = Input.ToLower();
+                string[] args = lower.Split(" ");
+                args[0] = args[0].Substring(1);
+
+                return args;
+            }
+            else return new string[0];
+        }
+
+        public bool IsConnectedToServer()
+        {
+            if ((client != null || stream != null) && isConnected)
+            {
+                return true;
+            }
+            else return false;
+        }
+
+        public bool TryCreateRoom(int port)
+        {
+            this.port = port;
+
+            if (StartServer())
+                return true;
+            else
+                return false;
+        }
+        public bool TryCreateRoom(string port)
+        {
+            Int32.TryParse(port, out this.port);
+
+            if (StartServer())
+                return true;
+            else 
+                return false;
+        }
+        public bool TryJoin(params string[] JoinCommand)
+        {
+            if (JoinCommand.Length == 2)
+            {
+                string[] data = JoinCommand[0].Split(":");
+
+                Int32.TryParse(data[1], out port);
+                host = data[0];
+            }
+            else if (JoinCommand.Length == 3)
+            {
+                host = JoinCommand[0];
+                Int32.TryParse(JoinCommand[1], out port);
+            }
+            else return false;
+
+            if (StartClient())
+            {
+                return true;
+            }
+            else return false;
+        }
+        public void TryDisconnect()
+        {
+            if (isConnected)
+                DisconnectClient();
+
+            else if (isServer) 
+                DisconnectServer();
+
+            else 
+                return;
+        }
+
         /// <summary>
         /// Sends messages with PostCodes between 1-4
         /// </summary>
@@ -222,7 +316,18 @@ namespace TCPChat
                 cmd.WriteLine("Can't send message: " + e.Message);  //If something went wrong ))
             }
         }
-        private void SendServerMessage(string msg, int PostCode)
+        public void SendMessage(string msg)
+        {
+            if (isConnected)
+                SendMessage(msg, 1);
+
+            else if (isServer) 
+                SendServerMessage(msg, 1);
+
+            else 
+                cmd.UserWriteLine(msg, user);
+        }
+        public void SendServerMessage(string msg, int PostCode)
         {
             try
             {
@@ -299,108 +404,6 @@ namespace TCPChat
             }
 
             cmd.SwitchToPrompt();                           //Lets go back to console
-        }
-
-        private void ParseCommand(string command)
-        {
-            if (command.Trim().Length < 1) return;          //If command is empty return back
-            if (command[0] != '/')                          //If this is not a command
-            {
-                if (isConnected)                            //If we are connected to the server
-                {
-                    SendMessage(command, 1);                //Send him message
-                    return;
-                }
-                else if (isServer)                          //Or if we are a server
-                {
-                    SendServerMessage(command, 1);          //Broadcast this message
-                    return;
-                }
-                else cmd.UserWriteLine(command, user);      //Or just print this message on the screen
-            }
-            else
-            {
-                command = command.ToLower();                //If this a command set it to lowercase
-                string[] args = command.Split(" ");         //Split for arguments
-                args[0] = args[0].Substring(1);             //And remove slash (/)
-
-                switch (args[0])
-                {
-                    case string s when (s == "join" || s == "connect"):
-                        {
-                            if ((client != null || stream != null) && isConnected)  //So if you try reconnect and you already have sesson
-                            {
-                                cmd.WriteLine("You need to disconnect first");          //You need ro disconnect)
-
-                                return;
-                            }
-
-                            if (args.Length == 3)                                   //If format is /join [host] [port]
-                            {
-                                host = args[1];
-                                Int32.TryParse(args[2], out port);
-                            }
-                            else if (args.Length == 2)                              //If format is /join [host]:[port]
-                            {
-                                string[] data = args[1].Split(":");
-                                host = data[0];
-                                Int32.TryParse(data[1], out port);
-                            }
-                            else return;
-
-                            StartClient();
-                            break;
-                        }
-                    case string s when (s == "create" || s == "room"):
-                        {
-                            if (args.Length == 2)
-                            {
-                                Int32.TryParse(args[1], out port);
-                            }
-                            else return;
-
-                            StartServer();
-                            break;
-                        }
-                    case string s when (s == "disconnect" || s == "dconnect"):
-                        {
-                            if (args.Length == 1)
-                            {
-                                if (isConnected)
-                                    DisconnectClient();
-                                else if (isServer) DisconnectServer();
-                                else return;
-                            }
-                            break;
-                        }
-                    case string s when (s == "clear" || s == "clr"):
-                        {
-                            if (args.Length == 1)
-                            {
-                                cmd.Clear();
-                            }
-                            break;
-                        }
-
-                    case string s when (s == "color"):
-                        {
-                            if (args.Length == 2)
-                            {
-                                user.SetColor(ColorParser.GetColorFromString(args[1]));
-
-                                if (isConnected)
-                                {
-                                    Message update = new Message(7, user);  //Updates userData on server
-                                    SendMessage(update);
-                                }
-
-                                break;
-                            }
-
-                            else return;
-                        }
-                }
-            }
         }
     }
 }

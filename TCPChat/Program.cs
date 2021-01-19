@@ -7,15 +7,20 @@ using TCPChat.AudioEngine;
 
 namespace TCPChat
 {
+    public enum Input
+    {
+        Command,
+        Message,
+        Empty
+    }
+
     internal class Program
     {
         private static NetworkManager network;
 
         private static void Main(string[] args)
         {
-            Console.ReadLine();
-
-            var Notification = new CachedSound("Notification.mp3");
+            var Notification = new CachedSound("Audio/Notification.mp3");
             AudioPlaybackEngine.Instance.PlaySound(Notification);
 
             Console.OutputEncoding = Encoding.Unicode;
@@ -124,13 +129,88 @@ namespace TCPChat
                     network.StartServer();                      //Start server
                 }
 
-            }
+            }                     //Check for console options
 
             else network.RegisterUser();                //If there are no commands, register user
 
             while (true)
             {
                 network.Process();                      //Starts manager
+            }
+        }
+        private void ParseCommand(string command)
+        {
+            Input input = network.GetInputType(command);
+
+            if (input == Input.Message)                          //If this is not a command
+            {
+                network.SendMessage(command);
+            }
+            else if(input == Input.Command)
+            {
+                string[] args = network.GetCommandArgs(command);
+
+                switch (args[0])
+                {
+                    case string s when (s == "join" || s == "connect"):
+                        {
+                            if (network.IsConnectedToServer())  //So if you try reconnect and you already have sesson
+                            {
+                                network.cmd.WriteLine("You need to disconnect first");          //You need ro disconnect)
+
+                                return;
+                            }
+
+                            if(network.TryJoin())
+                            {
+                                //success
+                            }
+
+                            break;
+                        }
+                    case string s when (s == "create" || s == "room"):
+                        {
+                            if (args.Length == 2)
+                            {
+                                if(network.TryCreateRoom(args[1]))
+                                {
+                                    //success
+                                }
+                            }
+                            else return;
+
+                            break;
+                        }
+                    case string s when (s == "disconnect" || s == "dconnect"):
+                        {
+                            if (args.Length == 1)
+                            {
+                                network.TryDisconnect();
+                            }
+                            break;
+                        }
+                    case string s when (s == "clear" || s == "clr"):
+                        {
+                            if (args.Length == 1)
+                            {
+                                network.cmd.Clear();
+                            }
+                            break;
+                        }
+
+                    case string s when (s == "color"):
+                        {
+                            if (args.Length == 2)
+                            {
+                                network.user.SetColor(ColorParser.GetColorFromString(args[1]));
+                                network.UpdateUserData();
+
+                                break;
+                            }
+
+                            else return;
+                        }
+                }
             }
         }
     }
