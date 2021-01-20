@@ -1,4 +1,8 @@
-# Simple Console TCP Chat
+![Logo](Logo.png)
+# OPEN TCPChat
+
+:computer: :mailbox_with_mail: 
+
 **Status:**    
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/TonSharp/Console-TCPChat/.NET?logo=Build)
@@ -9,8 +13,6 @@
 
 ![GitHub followers](https://img.shields.io/github/followers/TonSharp?label=Follow&style=social)
 ![GitHub watchers](https://img.shields.io/github/watchers/TonSharp/Console-TCPChat?label=Watch&style=social)
-
-:computer: :mailbox_with_mail: 
 
 Content:
  - [What is the TCPChat?](#What-is-the-TCPChat)
