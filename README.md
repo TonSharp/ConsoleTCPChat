@@ -1,7 +1,18 @@
 # Simple Console TCP Chat
-:computer: :mailbox_with_mail:
+:computer: :mailbox_with_mail:    
 
-### Content:
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/TonSharp/Console-TCPChat/.NET?logo=Build)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/TonSharp/Console-TCPChat?logo=Size)
+![GitHub](https://img.shields.io/github/license/TonSharp/Console-TCPChat?logo=License)
+![GitHub last commit](https://img.shields.io/github/last-commit/TonSharp/Console-TCPChat)
+
+![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/TonSharp/Console-TCPChat?include_prereleases)
+
+![GitHub followers](https://img.shields.io/github/followers/TonSharp?label=Follow&style=social)
+![GitHub watchers](https://img.shields.io/github/watchers/TonSharp/Console-TCPChat?label=Watch&style=social)
+
+
+Content:
  - [What is the TCPChat?](#What-is-the-TCPChat)
  - [Why do I need TCPChat?](#Why-do-I-need-TCPChat?)
  - [What are the advantages of TCPChat?](#What-are-the-advantages-of-TCPChat?)
@@ -31,13 +42,13 @@ TCP Chat is a completely anonymous application, all you need is to enter any nic
 
 # Development plan
 
-:white_check_mark: Basic ability to send messages;    
-:white_check_mark: RGB nickname support;    
-:white_check_mark: Console options support;    
-:white_check_mark: Sound support;    
-:white_large_square: Administrator system (commands, e.t.c.);    
-:white_large_square: Encryption support;    
-:white_large_square: File transfer support;    
+:white_check_mark: Basic ability to send messages;
+:white_check_mark: RGB nickname support;
+:white_check_mark: Console options support;
+:white_check_mark: Sound support;
+:white_large_square: Administrator system (commands, e.t.c.)
+:white_large_square: Encryption support;
+:white_large_square: File transfer support
 
 # Technical Specification
 
