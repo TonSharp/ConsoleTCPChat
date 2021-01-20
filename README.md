@@ -1,10 +1,45 @@
 # Simple Console TCP Chat
+:computer: :mailbox_with_mail:
 
-Simple .NET Core application that allows you to communicate with other users, via the console and the **TCP** protocol. You can create a room with **any port**, or connect to an existing one.
+### Content:
+ - [What is the TCPChat?](#What-is-the-TCPChat)
+ - [Why do I need TCPChat?](#Why-do-I-need-TCPChat?)
+ - [What are the advantages of TCPChat?](#What-are-the-advantages-of-TCPChat?)
+ - [Development plan](#Development-plan)
+ - [Technical Specification](#Technical-Specification)
+	 - [Client Side](#Client-Side)
+	 - [Server Side](#Server-Side)
+	 - [Message system](#Message-system)
+	 - [Commands](#Commands)
+	 - [Console Options](#Console-Options)
+
+# What is the TCPChat?
+
+TCPChat is a simple .NET Core application that allows you to communicate with other users, via the console and the **TCP** protocol. You can create a room with **any port**, or connect to an existing one.
+
+# Why do I need TCPChat?
+
+TCP Chat allows you to communicate without any registration or use of personal data of users. Just run and use. We do not use any third-party intermediate servers that store correspondence, all clients connect directly to the server on a remote computer. You can also use console options to speed up the connection process.
+
+# What are the advantages of TCPChat?
+
+I do not think that this project has any advantages. It was created for personal purposes. But still, in this project, you can highlight some features. It is designed in a retro style, which will allow you to feel the nostalgic atmosphere. You can use the console options for the shortcut to quickly set up communication with the remote computer. Support for sounds and RGB also improve the experience of interacting with the app.
 
 TCP Chat supports **RGB** color **nicknames**, **commands** for interacting with the server and clients (in development), console **options**. Many other cool features will appear in the future)
 
 TCP Chat is a completely anonymous application, all you need is to enter any nickname and color.
+
+# Development plan
+
+:white_check_mark: Basic ability to send messages;
+:white_check_mark: RGB nickname support;
+:white_check_mark: Console options support;
+:white_check_mark: Sound support;
+:white_large_square: Administrator system (commands, e.t.c.)
+:white_large_square: Encryption support;
+:white_large_square: File transfer support
+
+# Technical Specification
 
 ## Client Side
 
