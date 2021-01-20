@@ -31,13 +31,13 @@ TCP Chat is a completely anonymous application, all you need is to enter any nic
 
 # Development plan
 
-:white_check_mark: Basic ability to send messages;
-:white_check_mark: RGB nickname support;
-:white_check_mark: Console options support;
-:white_check_mark: Sound support;
-:white_large_square: Administrator system (commands, e.t.c.)
-:white_large_square: Encryption support;
-:white_large_square: File transfer support
+:white_check_mark: Basic ability to send messages;    
+:white_check_mark: RGB nickname support;    
+:white_check_mark: Console options support;    
+:white_check_mark: Sound support;    
+:white_large_square: Administrator system (commands, e.t.c.);    
+:white_large_square: Encryption support;    
+:white_large_square: File transfer support;    
 
 # Technical Specification
 
