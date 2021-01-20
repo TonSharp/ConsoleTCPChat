@@ -14,7 +14,9 @@
 ![GitHub followers](https://img.shields.io/github/followers/TonSharp?label=Follow&style=social)
 ![GitHub watchers](https://img.shields.io/github/watchers/TonSharp/ConsoleTCPChat?label=Watch&style=social)
 
-Content:
+- [Suport me on Patreon](https://www.patreon.com/TonSharp)
+
+**Content:**
  - [What is the TCPChat?](#What-is-the-TCPChat)
  - [Why do I need TCPChat?](#Why-do-I-need-TCPChat)
  - [What are the advantages of TCPChat?](#What-are-the-advantages-of-TCPChat)
