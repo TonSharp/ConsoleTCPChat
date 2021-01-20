@@ -14,8 +14,8 @@
 
 Content:
  - [What is the TCPChat?](#What-is-the-TCPChat)
- - [Why do I need TCPChat?](#Why-do-I-need-TCPChat?)
- - [What are the advantages of TCPChat?](#What-are-the-advantages-of-TCPChat?)
+ - [Why do I need TCPChat?](#Why-do-I-need-TCPChat)
+ - [What are the advantages of TCPChat?](#What-are-the-advantages-of-TCPChat)
  - [Development plan](#Development-plan)
  - [Technical Specification](#Technical-Specification)
 	 - [Client Side](#Client-Side)
