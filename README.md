@@ -5,14 +5,14 @@
 
 **Status:**    
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/TonSharp/Open-TCPChat/.NET?logo=Build)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/TonSharp/Open-TCPChat?logo=Size)
-![GitHub](https://img.shields.io/github/license/TonSharp/Open-TCPChat?logo=License)
-![GitHub last commit](https://img.shields.io/github/last-commit/TonSharp/Open-TCPChat)    
-![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/TonSharp/Open-TCPChat?include_prereleases)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/TonSharp/ConsoleTCPChat/.NET?logo=Build)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/TonSharp/ConsoleTCPChat?logo=Size)
+![GitHub](https://img.shields.io/github/license/TonSharp/ConsoleTCPChat?logo=License)
+![GitHub last commit](https://img.shields.io/github/last-commit/TonSharp/ConsoleTCPChat)    
+![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/TonSharp/ConsoleTCPChat?include_prereleases)
 
 ![GitHub followers](https://img.shields.io/github/followers/TonSharp?label=Follow&style=social)
-![GitHub watchers](https://img.shields.io/github/watchers/TonSharp/Open-TCPChat?label=Watch&style=social)
+![GitHub watchers](https://img.shields.io/github/watchers/TonSharp/ConsoleTCPChat?label=Watch&style=social)
 
 Content:
  - [What is the TCPChat?](#What-is-the-TCPChat)
