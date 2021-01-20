@@ -18,13 +18,22 @@ namespace TCPChat
     {
         private static NetworkManager network;
 
+        private static CachedSound StartupSound;
+        private static CachedSound MessageNotificationSound;
+        private static CachedSound ConnectionSound;
+
         private static void Main(string[] args)
         {
-            var Notification = new CachedSound("Audio/Notification.mp3");
-            AudioPlaybackEngine.Instance.PlaySound(Notification);
+            try
+            {
+                StartupSound = new CachedSound("Audio/Startup.mp3");
+                MessageNotificationSound = new CachedSound("Audio/MessageNotification.mp3");
+                ConnectionSound = new CachedSound("Audio/Connection.mp3");
+            }
+            catch { }
 
             Console.OutputEncoding = Encoding.Unicode;
-            network = new NetworkManager();
+            network = new NetworkManager(Notification);
 
             string name = "";
             string color = "";
@@ -34,6 +43,11 @@ namespace TCPChat
 
             bool StartServer = false;
             bool StartClient = false;
+
+            try
+            {
+                AudioPlaybackEngine.Instance.PlaySound(StartupSound);
+            } catch { }
 
             if (args.Length > 0)                //Check for console options
             {
@@ -120,8 +134,13 @@ namespace TCPChat
                         network.host = host;
                         network.port = port;
 
-                        network.StartClient();                      //then start client
-
+                        if(network.StartClient())                      //then start client
+                        {
+                            try
+                            {
+                                AudioPlaybackEngine.Instance.PlaySound(ConnectionSound);
+                            } catch { }
+                        }
                         network.cmd.SwitchToPrompt();
                     }
 
@@ -129,17 +148,23 @@ namespace TCPChat
                     {
                         network.port = port;
 
-                        network.StartServer();                      //Start server
+                        if(network.StartServer())                    //Start server
+                        {
+                            try
+                            {
+                                AudioPlaybackEngine.Instance.PlaySound(ConnectionSound);
+                            }
+                            catch { }
+                        }
 
                         network.cmd.SwitchToPrompt();
                     }
                 }
                 else network.RegisterUser();                                        //Or register him
 
-            }                     //Check for console options
+            }
 
             else network.RegisterUser();                //If there are no commands, register user
-
             while (true)
             {
                 ParseCommand(network.Process());                      //Starts manager
@@ -170,7 +195,11 @@ namespace TCPChat
 
                             if(network.TryJoin(args))
                             {
-                                //success
+                                try
+                                {
+                                    AudioPlaybackEngine.Instance.PlaySound(ConnectionSound);
+                                }
+                                catch { }
                             }
 
                             break;
@@ -181,7 +210,11 @@ namespace TCPChat
                             {
                                 if(network.TryCreateRoom(args[1]))
                                 {
-                                    //success
+                                    try
+                                    {
+                                        AudioPlaybackEngine.Instance.PlaySound(ConnectionSound);
+                                    }
+                                    catch { }
                                 }
                             }
                             else return;
@@ -219,6 +252,11 @@ namespace TCPChat
                         }
                 }
             }
+        }
+
+        private static void Notification()
+        {
+            AudioPlaybackEngine.Instance.PlaySound(MessageNotificationSound);
         }
     }
 }

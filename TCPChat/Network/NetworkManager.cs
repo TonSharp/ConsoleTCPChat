@@ -27,10 +27,12 @@ namespace TCPChat
         internal bool RecieveMessages = false;
 
         public NetworkStream stream;
+        public Action Notification;
 
-        public NetworkManager()
+        public NetworkManager(Action Notification)
         {
             cmd = new CMD();
+            this.Notification = Notification;
         }
 
         public string Process()
@@ -112,7 +114,7 @@ namespace TCPChat
 
             try
             {
-                server = new Server(cmd, port); //Start new server
+                server = new Server(cmd, port, Notification); //Start new server
                 isServer = true;
 
                 if (isConnected) isConnected = false;   //If it was client. No, its doesnt)
@@ -389,7 +391,7 @@ namespace TCPChat
             switch (message.PostCode)
             {
                 case 1:
-                    cmd.UserWriteLine(message.message, message.Sender); break;
+                    cmd.UserWriteLine(message.message, message.Sender); Notification(); break;
                 case 8:
                     cmd.ConnectionMessage(message.Sender, "has joined"); break;
                 case 9:

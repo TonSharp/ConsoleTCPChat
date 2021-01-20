@@ -43,6 +43,7 @@ namespace TCPChat
                             {
                                 case int i when (i >= 1 && i <= 4):
                                     {
+                                        server.Notification();
                                         server.BroadcastMessage(msg, Id);   //If this is regular message then broadcast it
                                         break;
                                     }

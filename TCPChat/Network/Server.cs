@@ -13,11 +13,13 @@ namespace TCPChat
         private readonly List<Client> clients = new List<Client>();
         private readonly CMD LocalCMD;
         private readonly int port;
+        public Action Notification;
 
-        public Server(CMD cmd, int port)
+        public Server(CMD cmd, int port, Action Notification)
         {
             LocalCMD = cmd;
             this.port = port;
+            this.Notification = Notification;
         }
 
         protected internal void AddConnection(Client clientObject)
