@@ -33,9 +33,9 @@ namespace TCPChat
             cmd = new CMD();
         }
 
-        public void Process()
+        public string Process()
         {
-            cmd.ReadLine(user);      //Always read command and parse it in main thread
+            return cmd.ReadLine(user);      //Always read command and parse it in main thread
         }
 
         protected internal void RegisterUser()
@@ -249,7 +249,7 @@ namespace TCPChat
         {
             if (JoinCommand.Length == 2)
             {
-                string[] data = JoinCommand[0].Split(":");
+                string[] data = JoinCommand[1].Split(":");
 
                 Int32.TryParse(data[1], out port);
                 host = data[0];

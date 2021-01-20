@@ -135,10 +135,10 @@ namespace TCPChat
 
             while (true)
             {
-                network.Process();                      //Starts manager
+                ParseCommand(network.Process());                      //Starts manager
             }
         }
-        private void ParseCommand(string command)
+        private static void ParseCommand(string command)
         {
             Input input = network.GetInputType(command);
 
@@ -161,7 +161,7 @@ namespace TCPChat
                                 return;
                             }
 
-                            if(network.TryJoin())
+                            if(network.TryJoin(args))
                             {
                                 //success
                             }
