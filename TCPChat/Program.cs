@@ -112,22 +112,29 @@ namespace TCPChat
                 if (color.Length > 0 && name.Length > 0)                            //If color and name are specified then
                 {
                     network.user = new User(name, ColorParser.GetColorFromString(color)); //Set up user
+
+                    network.cmd.Clear();
+
+                    if (host.Length > 0 && port > 0 && StartClient && !StartServer)     //If host and port are specified and this is client
+                    {
+                        network.host = host;
+                        network.port = port;
+
+                        network.StartClient();                      //then start client
+
+                        network.cmd.SwitchToPrompt();
+                    }
+
+                    if (port > 0 && StartServer && !StartClient)    //If port specified and this is server
+                    {
+                        network.port = port;
+
+                        network.StartServer();                      //Start server
+
+                        network.cmd.SwitchToPrompt();
+                    }
                 }
                 else network.RegisterUser();                                        //Or register him
-
-                if (host.Length > 0 && port > 0 && StartClient && !StartServer)     //If host and port are specified and this is client
-                {
-                    network.host = host;
-                    network.port = port;
-
-                    network.StartClient();                      //then start client
-                }
-                if (port > 0 && StartServer && !StartClient)    //If port specified and this is server
-                {
-                    network.port = port;
-
-                    network.StartServer();                      //Start server
-                }
 
             }                     //Check for console options
 
