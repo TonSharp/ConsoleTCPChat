@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using TCPChat.Tools;
 
-namespace TCPChat
+namespace TCPChat.Network
 {
     public class User
     {
-        private int userDataSize
+        private int UserDataSize
         {
             get
             {
-                int size = Serializer.GetStringDataSize(UserName);
+                var size = Serializer.GetStringDataSize(UserName);
                 size += sizeof(int); //ARGB Color
 
                 return size;
@@ -33,71 +34,62 @@ namespace TCPChat
             Color = color;
         }
 
-        public User(string Name, Color Color)
+        public User(string name, Color color)
         {
-            UserName = Name;
-            this.Color = Color;
+            UserName = name;
+            Color = color;
         }
 
         /// <summary>
         /// Use this only for deserialization. Creates user based on Serialized UserData
         /// </summary>
-        /// <param name="Data">Data that begins from UserData</param>
-        /// <param name="OtherData">Remaining data afer UserData</param>
-        public User(byte[] Data, out byte[] OtherData)                 //Rewrite without deserialize
+        /// <param name="data">Data that begins from UserData</param>
+        /// <param name="otherData">Remaining data after UserData</param>
+        public User(byte[] data, out byte[] otherData)                 //Rewrite without deserialize
         {
-            int userDataSize;
-            byte[] colorData;
+            UserName = Serializer.DeserializeString(data, 1)[0];        //Deserialize UserName
+            var userDataSize = Serializer.GetStringDataSize(UserName);
+            var colorData = Serializer.CopyFrom(data, userDataSize);
 
-            UserName = Serializer.DeserializeString(Data, 1)[0];        //Deserialize UserName
-            userDataSize = Serializer.GetStringDataSize(UserName);
-            colorData = Serializer.CopyFrom(Data, userDataSize);        //Copy colorData from Data
-
-            using (MemoryStream stream = new MemoryStream(colorData))
+            using (var stream = new MemoryStream(colorData))
             {
-                BinaryReader reader = new BinaryReader(stream);
+                var reader = new BinaryReader(stream);
                 Color = Color.FromArgb(reader.ReadInt32());
                 userDataSize += sizeof(int);
             }
 
-            OtherData = Serializer.CopyFrom(Data, userDataSize);        
+            otherData = Serializer.CopyFrom(data, userDataSize);        
         }
 
         /// <summary>
         /// Use this only for deserialization. Creates user based on Serialized UserData
         /// </summary>
-        /// <param name="Data">Data that begins from UserData</param>
-        public User(byte[] Data)                                       //Rewrite without deserialize
+        /// <param name="data">Data that begins from UserData</param>
+        public User(byte[] data)                                       //Rewrite without deserialize
         {
-            int nameDataSize;
-            byte[] colorData;
+            UserName = Serializer.DeserializeString(data, 1)[0];
+            var nameDataSize = Serializer.GetStringDataSize(UserName);
 
-            UserName = Serializer.DeserializeString(Data, 1)[0];
-            nameDataSize = Serializer.GetStringDataSize(UserName);
+            var colorData = Serializer.CopyFrom(data, nameDataSize);
 
-            colorData = Serializer.CopyFrom(Data, nameDataSize);
+            using var stream = new MemoryStream(colorData);
+            var reader = new BinaryReader(stream);
 
-            using(MemoryStream stream = new MemoryStream(colorData))
-            {
-                BinaryReader reader = new BinaryReader(stream);
-
-                Color = Color.FromArgb(reader.ReadInt32());
-            }
+            Color = Color.FromArgb(reader.ReadInt32());
         }
 
         /// <summary>
         /// Deserialize data based on usedDataSize
         /// </summary>
-        /// <param name="Data">Data for deserialization</param>
-        /// <param name="OtherData">Remaining data after UserData</param>
-        public void Deserialize(byte[] Data, out byte[] OtherData)
+        /// <param name="data">Data for deserialization</param>
+        /// <param name="otherData">Remaining data after UserData</param>
+        public void Deserialize(byte[] data, out byte[] otherData)
         {
-            byte[] userData = new byte[userDataSize];
-            byte[] colorData;
+            var userData = new byte[UserDataSize];
 
-            OtherData = Serializer.CopyFrom(Data, userDataSize);
+            otherData = Serializer.CopyFrom(data, UserDataSize);
 
-            string[] userDataStrings = Serializer.DeserializeString(userData, 1, out colorData);
+            var userDataStrings = Serializer.DeserializeString(userData, 1, out var colorData);
 
             UserName = userDataStrings[0];
             Color = Color.FromArgb(Convert.ToInt32(colorData));
@@ -109,15 +101,13 @@ namespace TCPChat
         /// <returns>Serialized byte array</returns>
         public byte[] Serialize()
         {
-            byte[] data = new byte[userDataSize];
+            var data = new byte[UserDataSize];
 
-            using (MemoryStream stream = new MemoryStream(data))
-            {
-                BinaryWriter writer = new BinaryWriter(stream);
+            using var stream = new MemoryStream(data);
+            var writer = new BinaryWriter(stream);
 
-                writer.Write(Serializer.SerializeString(UserName));
-                writer.Write(Color.ToArgb());
-            }
+            writer.Write(Serializer.SerializeString(UserName));
+            writer.Write(Color.ToArgb());
 
             return data;
         }

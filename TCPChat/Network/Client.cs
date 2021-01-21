@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Net.Sockets;
 using System.Text;
+using TCPChat.Tools;
 
-namespace TCPChat
+namespace TCPChat.Network
 {
     public class Client
     {
-        protected internal string Id { get; private set; }
+        protected internal string Id { get; }
         protected internal NetworkStream Stream { get; private set; }
-        public User user;
+        private User user;
         private readonly TcpClient client;
         private readonly Server server;
 
         public Client(TcpClient tcpClient, Server serverObject)
         {
-            Id = Guid.NewGuid().ToString();                     //Generate new unigue ID
+            Id = Guid.NewGuid().ToString();                     //Generate new unique ID
             client = tcpClient;
             server = serverObject;
             serverObject.AddConnection(this);
@@ -24,24 +25,23 @@ namespace TCPChat
         {  
             try
             {
-                Message msg;
                 Stream = client.GetStream();    //Gets stream
                     
                 InitializeUserData();           //Gets userData
-                SendID();                       //Sends ID, Oddly enough)
+                SendId();                       //Sends ID, Oddly enough)
 
                 while (true)
                 {
                     try
                     {
-                        string message = GetMessage();  //While stream is available lets read stream
+                        var message = GetMessage();  //While stream is available lets read stream
                         if (message.Length > 0)         //If message is not empty
                         {
-                            msg = new Message(Encoding.Unicode.GetBytes(message));  //Lets parse it
+                            var msg = new Message(Encoding.Unicode.GetBytes(message));
 
                             switch(msg.PostCode)
                             {
-                                case int i when (i >= 1 && i <= 4):
+                                case { } i when (i >= 1 && i <= 4):
                                     {
                                         server.Notification();
                                         server.BroadcastMessage(msg, Id);   //If this is regular message then broadcast it
@@ -67,8 +67,8 @@ namespace TCPChat
                     }
                     catch
                     {
-                        Message disconnMsg = new Message(9, user);          //If there is error, disconnect this user
-                        server.BroadcastMessage(disconnMsg, Id);
+                        var disconnectionMsg = new Message(9, user);          //If there is error, disconnect this user
+                        server.BroadcastMessage(disconnectionMsg, Id);
                         break;
                     }
                 }
@@ -84,33 +84,30 @@ namespace TCPChat
             }
         }
 
-        public void InitializeUserData()
+        private void InitializeUserData()
         {
-            byte[] messageData = Encoding.Unicode.GetBytes(GetMessage());
+            var messageData = Encoding.Unicode.GetBytes(GetMessage());
 
-            if (messageData[0] == 8 || messageData[0] == 9)
-            {
-                byte[] userData = Serializer.CopyFrom(messageData, 4);
-                user = new User(userData);
+            if (messageData[0] != 8 && messageData[0] != 9) return;
+            var userData = Serializer.CopyFrom(messageData, 4);
+            user = new User(userData);
 
-                server.BroadcastMessage(new Message(8, user), Id);
-            }
+            server.BroadcastMessage(new Message(8, user), Id);
         }
 
-        void SendID()
+        private void SendId()
         {
-            Message msg = new Message(11, Id);
+            var msg = new Message(11, Id);
             Stream.Write(msg.Serialize());
         }
 
         private string GetMessage()
         {
-            byte[] data = new byte[64];
-            StringBuilder builder = new StringBuilder();
-            int bytes = 0;
+            var data = new byte[64];
+            var builder = new StringBuilder();
             do
             {
-                bytes = Stream.Read(data, 0, data.Length);
+                var bytes = Stream.Read(data, 0, data.Length);
                 builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
             }
             while (Stream.DataAvailable);
@@ -120,10 +117,8 @@ namespace TCPChat
 
         protected internal void Close()
         {
-            if (Stream != null)
-                Stream.Close();
-            if (client != null)
-                client.Close();
+            Stream?.Close();
+            client?.Close();
         }
     }
 }

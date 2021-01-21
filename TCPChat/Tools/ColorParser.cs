@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
 
-namespace TCPChat
+namespace TCPChat.Tools
 {
     public static class ColorParser
     {
@@ -9,7 +9,7 @@ namespace TCPChat
         {
             try
             {
-                Color consoleColor = Color.White;
+                var consoleColor = Color.White;
                 if(color[0] != '#')         //If this is not html color
                 {
                     KnownColor knownColor = Enum.Parse<KnownColor>(color, true);
@@ -17,17 +17,17 @@ namespace TCPChat
                 }
                 else if(color.Length == 7)
                 {
-                    consoleColor = System.Drawing.ColorTranslator.FromHtml(color); // Or parse html color
-                    byte[] bytecolor = BitConverter.GetBytes(consoleColor.ToArgb());
+                    consoleColor = ColorTranslator.FromHtml(color); // Or parse html color
+                    byte[] byteColor = BitConverter.GetBytes(consoleColor.ToArgb());
 
-                    if(bytecolor[0] <= 48 && bytecolor[1] <= 48 && bytecolor[2] <= 48)
+                    if(byteColor[0] <= 48 && byteColor[1] <= 48 && byteColor[2] <= 48)
                     {
                         consoleColor = Color.White;
                     }
                 }
 
 
-                if (consoleColor == Color.Black) consoleColor = Color.White; //If this is Black Color, then it will be White color, no rasizm)
+                if (consoleColor == Color.Black) consoleColor = Color.White; //If this is Black Color, then it will be White color, no racism)
 
                 return consoleColor;
             }

@@ -1,64 +1,64 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Net.Sockets;
+using TCPChat.Tools;
 
-namespace TCPChat
+namespace TCPChat.Network
 {
     public class NetworkManager
     {
-        public User user;
-        public CMD cmd;
+        public User User;
+        public readonly Cmd Cmd;
 
         private Server server;
         private TcpClient client;
 
-        private Thread ListenThread;
-        private Thread ReceiveThread;
+        private Thread listenThread;
+        private Thread receiveThread;
 
         private string id = "null";
 
-        protected internal string host = "127.0.0.1";
-        protected internal int port = 23;
+        protected internal string Host = "127.0.0.1";
+        protected internal int Port = 23;
 
         private bool isConnected = false;
         private bool isServer = false;
-        internal bool RecieveMessages = false;
+        private bool receiveMessage = false;
 
-        public NetworkStream stream;
-        public Action Notification;
+        private NetworkStream stream;
+        private readonly Action notification;
 
-        public NetworkManager(Action Notification)
+        public NetworkManager(Action notification)
         {
-            cmd = new CMD();
-            this.Notification = Notification;
+            Cmd = new Cmd();
+            this.notification = notification;
         }
 
         public string Process()
         {
-            return cmd.ReadLine(user);      //Always read command and parse it in main thread
+            return Cmd.ReadLine(User);      //Always read command and parse it in main thread
         }
 
         protected internal void RegisterUser()
         {
-            tryoncemore:
+            tryOnceMore:
             Console.Write("Enter your name: ");
-            string userName = Console.ReadLine();
-            if(userName.Length > 16)
+            var userName = Console.ReadLine();
+            if(userName != null && userName.Length > 16)
             {
                 Console.WriteLine("Name is too long");
-                goto tryoncemore;
+                goto tryOnceMore;
             }
 
-            Console.Title = userName;             //Set title for user with him userName
+            Console.Title = userName!;             //Set title for user with him userName
 
             Console.Write("Enter your color (white): ");
-            string color = Console.ReadLine();
+            var color = Console.ReadLine();
 
             Console.Clear();
 
-            user = new User(userName, ColorParser.GetColorFromString(color));   //Parse color from string and create user
+            User = new User(userName, ColorParser.GetColorFromString(color));   //Parse color from string and create user
         }
 
         public bool StartClient()
@@ -75,37 +75,35 @@ namespace TCPChat
 
             try
             {
-                client = new TcpClient(host, port);
+                client = new TcpClient(Host, Port);
                 isConnected = true;
                 stream = client.GetStream();            //Connects to the server and gets its stream
 
-                Message UserDataMessage = new Message(8, user);      //Sends UserData to the server
-                stream.Write(UserDataMessage.Serialize());
+                var userDataMessage = new Message(8, User);      //Sends UserData to the server
+                stream.Write(userDataMessage.Serialize());
 
-                cmd.WriteLine("Succesfully connected to the server");
+                Cmd.WriteLine("Successfully connected to the server");
 
-                GetID();                                //Gets own ID
+                GetId();                                //Gets own ID
 
-                RecieveMessages = true;
+                receiveMessage = true;
 
-                ReceiveThread = new Thread(new ThreadStart(ReceiveMessage)); //Starting receive message thread
-                ReceiveThread.Start();
+                receiveThread = new Thread(ReceiveMessage); //Starting receive message thread
+                receiveThread.Start();
                 return true;
             }
             catch (Exception e)
             {
-                cmd.WriteLine("Can't connect to the server: " + e.Message);
+                Cmd.WriteLine("Can't connect to the server: " + e.Message);
                 return false;
             }
         }
 
         public void UpdateUserData()
         {
-            if(isConnected)
-            {
-                Message update = new Message(7, user);  //Updates userData on server
-                SendMessage(update);
-            }
+            if (!isConnected) return;
+            var update = new Message(7, User);  //Updates userData on server
+            SendMessage(update);
         }
 
         public bool StartServer()
@@ -115,19 +113,18 @@ namespace TCPChat
                 server.Disconnect();            //Then close it
                 server = null;
 
-                if (ListenThread != null)
-                    ListenThread.Interrupt();
+                listenThread?.Interrupt();
             }
 
             try
             {
-                server = new Server(cmd, port, Notification); //Start new server
+                server = new Server(Cmd, Port, notification); //Start new server
                 isServer = true;
 
                 if (isConnected) isConnected = false;   //If it was client. No, its doesnt)
 
-                ListenThread = new Thread(new ThreadStart(server.Listen));
-                ListenThread.Start();
+                listenThread = new Thread(server.Listen);
+                listenThread.Start();
 
                 isServer = true;
 
@@ -135,29 +132,25 @@ namespace TCPChat
             }
             catch(Exception e)
             {
-                cmd.WriteLine("Can't start server: " + e.Message);
+                Cmd.WriteLine("Can't start server: " + e.Message);
                 return false;
             }
         }
 
         private void ReceiveMessage()
         {
-            byte[] message;
-
-            while(RecieveMessages)
+            while(receiveMessage)
             {
                 try
                 {
-                    message = GetMessage();                     //Lets get message while Receive is available
+                    var message = GetMessage();
 
-                    if (message != null && message.Length > 0)  //If message is not empty
-                    {
-                        Message msg = new Message(message);     //Lets get it
-                        ParseMessage(msg);                      //And parse
-                    }
+                    if (message == null || message.Length <= 0) continue;
+                    var msg = new Message(message);     //Lets get it
+                    ParseMessage(msg);                      //And parse
                 }
                 catch (ThreadInterruptedException) { return; }
-                catch (System.IO.IOException) { return; }       //If Thread was interupted or something
+                catch (System.IO.IOException) { return; }       //If Thread was interrupted or something
                 catch (Exception e)
                 {
                     Console.WriteLine("Can't receive message: " + e.Message);   //If something went wrong
@@ -170,30 +163,25 @@ namespace TCPChat
         {
             try
             {
-                byte[] data = new byte[64];
-                StringBuilder builder = new StringBuilder();
-                int bytes = 0;
+                var data = new byte[64];
+                var builder = new StringBuilder();
 
-                if(stream != null)                          //If stream is not empty
+                if (stream == null) return null;
+                do
                 {
-                    do
-                    {
-                        bytes = stream.Read(data, 0, data.Length);
-                        builder.Append(Encoding.Unicode.GetString(data));   
-                    } while (stream.DataAvailable);         //Lets read this while stream is available
+                    stream.Read(data, 0, data.Length);
+                    builder.Append(Encoding.Unicode.GetString(data));
+                } while (stream.DataAvailable);         //Lets read this while stream is available
 
-                    return Encoding.Unicode.GetBytes(builder.ToString());   //Return message bytes array
-                }
-
-                return null;
+                return Encoding.Unicode.GetBytes(builder.ToString());   //Return message bytes array
 
             }
-            catch (System.NullReferenceException) { return null; }
+            catch (NullReferenceException) { return null; }
 
-            catch (System.IO.IOException)                       //If stram was stopped
+            catch (System.IO.IOException)                       //If stream was stopped
             { 
-                cmd.WriteLine("You are disconnetcted"); 
-                cmd.SwitchToPrompt();
+                Cmd.WriteLine("You are disconnected"); 
+                Cmd.SwitchToPrompt();
                 if (isConnected) StopClient();
                 else if (isServer) DisconnectServer();
                 return null;
@@ -201,80 +189,64 @@ namespace TCPChat
 
             catch (Exception e)                                 //If something went wrong
             {
-                cmd.WriteLine("Can't get message from thread: " + e.Message);
+                Cmd.WriteLine("Can't get message from thread: " + e.Message);
 
                 return null;
             }
         }
 
-        public Input GetInputType(string Input)
+        public Input GetInputType(string input)
         {
-            if (Input.Trim().Length < 1) return TCPChat.Input.Empty;
-            if (Input[0] == '/') return TCPChat.Input.Command;
-            else return TCPChat.Input.Message;
+            if (input.Trim().Length < 1) return Input.Empty;
+            return input[0] == '/' ? Input.Command : Input.Message;
         }
 
-        public string[] GetCommandArgs(string Input)
+        public string[] GetCommandArgs(string input)
         {
-            if (GetInputType(Input) == TCPChat.Input.Command)
+            if (GetInputType(input) == Input.Command)
             {
-                string lower = Input.ToLower();
-                string[] args = lower.Split(" ");
+                var lower = input.ToLower();
+                var args = lower.Split(" ");
                 args[0] = args[0].Substring(1);
 
                 return args;
             }
-            else return new string[0];
+
+            return new string[0];
         }
 
         public bool IsConnectedToServer()
         {
-            if ((client != null || stream != null) && isConnected)
-            {
-                return true;
-            }
-            else return false;
+            return (client != null || stream != null) && isConnected;
         }
 
-        public bool TryCreateRoom(int port)
-        {
-            this.port = port;
-
-            if (StartServer())
-                return true;
-            else
-                return false;
-        }
         public bool TryCreateRoom(string port)
         {
-            Int32.TryParse(port, out this.port);
+            int.TryParse(port, out Port);
 
-            if (StartServer())
-                return true;
-            else 
-                return false;
+            return StartServer();
         }
-        public bool TryJoin(params string[] JoinCommand)
+        public bool TryJoin(params string[] joinCommand)
         {
-            if (JoinCommand.Length == 2)
+            switch (joinCommand.Length)
             {
-                string[] data = JoinCommand[1].Split(":");
+                case 2:
+                {
+                    var data = joinCommand[1].Split(":");
 
-                Int32.TryParse(data[1], out port);
-                host = data[0];
+                    int.TryParse(data[1], out Port);
+                    Host = data[0];
+                    break;
+                }
+                case 3:
+                    Host = joinCommand[0];
+                    int.TryParse(joinCommand[1], out Port);
+                    break;
+                default:
+                    return false;
             }
-            else if (JoinCommand.Length == 3)
-            {
-                host = JoinCommand[0];
-                Int32.TryParse(JoinCommand[1], out port);
-            }
-            else return false;
 
-            if (StartClient())
-            {
-                return true;
-            }
-            else return false;
+            return StartClient();
         }
         public void TryDisconnect()
         {
@@ -283,37 +255,34 @@ namespace TCPChat
 
             else if (isServer) 
                 DisconnectServer();
-
-            else 
-                return;
         }
 
         /// <summary>
         /// Sends messages with PostCodes between 1-4
         /// </summary>
         /// <param name="msg"></param>
-        /// <param name="PostCode"></param>
-        private void SendMessage(string msg, int PostCode)
+        /// <param name="postCode"></param>
+        private void SendMessage(string msg, int postCode)
         {
             try
             {
                 if (msg.Trim().Length < 0) throw new Exception("Message is empty"); //If message empty
-                Message message = new Message(PostCode, user, msg);
-                byte[] data = message.Serialize();
+                var message = new Message(postCode, User, msg);
+                var data = message.Serialize();
 
-                cmd.UserWriteLine(msg, user);
+                Cmd.UserWriteLine(msg, User);
                 stream.Write(data, 0, data.Length);         //Serialize message and send it
             }
             catch(Exception e)
             {
-                cmd.WriteLine("Can't send message: " + e.Message);  //If something went wrong
+                Cmd.WriteLine("Can't send message: " + e.Message);  //If something went wrong
             }
         }
         private void SendMessage(Message msg)
         {
             try
             {
-                byte[] data = msg.Serialize();
+                var data = msg.Serialize();
 
                 if(data.Length > 0)             //If message is not empty
                 {
@@ -322,7 +291,7 @@ namespace TCPChat
             }
             catch(Exception e)
             {
-                cmd.WriteLine("Can't send message: " + e.Message);  //If something went wrong ))
+                Cmd.WriteLine("Can't send message: " + e.Message);  //If something went wrong ))
             }
         }
         public void SendMessage(string msg)
@@ -334,39 +303,40 @@ namespace TCPChat
                 SendServerMessage(msg, 1);
 
             else 
-                cmd.UserWriteLine(msg, user);
+                Cmd.UserWriteLine(msg, User);
         }
-        public void SendServerMessage(string msg, int PostCode)
+
+        private void SendServerMessage(string msg, int postCode)
         {
             try
             {
                 if (msg.Trim().Length < 1) throw new Exception("Message is empty");  //The same situation
-                Message message = new Message(PostCode, user, msg);
+                var message = new Message(postCode, User, msg);
 
-                cmd.UserWriteLine(msg, user);
+                Cmd.UserWriteLine(msg, User);
                 server.BroadcastFromServer(message);                            //Broadcast message to all clients
             }
             catch(Exception e)
             {
-                cmd.WriteLine("Can't send message from the server: " + e.Message);
+                Cmd.WriteLine("Can't send message from the server: " + e.Message);
             }
         }
 
-        private void GetID()
+        private void GetId()
         {
-            Message msg = new Message(GetMessage());
+            var msg = new Message(GetMessage());
 
-            this.id = msg.message;
-            cmd.WriteLine("Your ID: "+ id);
+            id = msg.TextMessage;
+            Cmd.WriteLine("Your ID: "+ id);
         }
 
         private void StopClient()
         {
-            if (RecieveMessages)
+            if (receiveMessage)
             {
-                RecieveMessages = false;
-                ReceiveThread.Interrupt();
-                ReceiveThread = null;
+                receiveMessage = false;
+                receiveThread.Interrupt();
+                receiveThread = null;
             }
             if (stream != null)
             {
@@ -386,7 +356,7 @@ namespace TCPChat
 
         private void DisconnectClient()
         {
-            Message msg = new Message(9, user);  //Send message to server about disconnecting
+            Message msg = new Message(9, User);  //Send message to server about disconnecting
             stream.Write(msg.Serialize());       //Disconnect this client from server
 
             StopClient();
@@ -403,21 +373,21 @@ namespace TCPChat
             switch (message.PostCode)
             {
                 case 1:
-                    cmd.UserWriteLine(message.message, message.Sender); Notification(); break;
+                    Cmd.UserWriteLine(message.TextMessage, message.Sender); notification(); break;
                 case 8:
-                    cmd.ConnectionMessage(message.Sender, "has joined"); break;
+                    Cmd.ConnectionMessage(message.Sender, "has joined"); break;
                 case 9:
-                    cmd.ConnectionMessage(message.Sender, "has disconnected"); break;
+                    Cmd.ConnectionMessage(message.Sender, "has disconnected"); break;
                 case 10:
                     {
                         DisconnectClient();                 //If server sends us message about stopping
-                        cmd.WriteLine("Server was stoped"); //We are decide to write this
+                        Cmd.WriteLine("Server was stopped"); //We are decide to write this
                         break;
                     }
                 default: return;
             }
 
-            cmd.SwitchToPrompt();                           //Lets go back to console
+            Cmd.SwitchToPrompt();                           //Lets go back to console
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TCPChat
+namespace TCPChat.Tools
 {
     public class Vector2
     {
@@ -36,9 +36,9 @@ namespace TCPChat
             this.y = y;
         }
 
-        public Vector2(Action OnPositionChanged, int x = 0, int y = 0) : this(x, y)
+        public Vector2(Action onPositionChanged, int x = 0, int y = 0) : this(x, y)
         {
-            PositionChanged = OnPositionChanged;
+            PositionChanged = onPositionChanged;
         }
     }
 }

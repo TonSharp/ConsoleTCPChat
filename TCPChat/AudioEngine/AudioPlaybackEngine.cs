@@ -6,12 +6,12 @@ using System.Text;
 
 namespace TCPChat.AudioEngine
 {
-    class AudioPlaybackEngine : IDisposable
+    internal class AudioPlaybackEngine : IDisposable
     {
         private readonly IWavePlayer outputDevice;
         private readonly MixingSampleProvider mixer;
 
-        public AudioPlaybackEngine(int sampleRate = 44100, int channelCount = 2)
+        private AudioPlaybackEngine(int sampleRate = 44100, int channelCount = 2)
         {
             outputDevice = new WaveOutEvent();
             mixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(sampleRate, channelCount));

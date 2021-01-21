@@ -4,22 +4,23 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using TCPChat.Tools;
 
-namespace TCPChat
+namespace TCPChat.Network
 {
     public class Server
     {
-        private static TcpListener tcpListener;
+        private static TcpListener _tcpListener;
         private readonly List<Client> clients = new List<Client>();
-        private readonly CMD LocalCMD;
+        private readonly Cmd localCmd;
         private readonly int port;
-        public Action Notification;
+        public readonly Action Notification;
 
-        public Server(CMD cmd, int port, Action Notification)
+        public Server(Cmd cmd, int port, Action notification)
         {
-            LocalCMD = cmd;
+            localCmd = cmd;
             this.port = port;
-            this.Notification = Notification;
+            this.Notification = notification;
         }
 
         protected internal void AddConnection(Client clientObject)
@@ -28,7 +29,7 @@ namespace TCPChat
         }
         protected internal void RemoveConnection(string id)
         {
-            Client client = clients.FirstOrDefault(c => c.Id == id);    //Pick client with specified ID
+            var client = clients.FirstOrDefault(c => c.Id == id);    //Pick client with specified ID
 
             if (client != null)                     //If its exist
                 clients.Remove(client);             //Remove connection
@@ -38,61 +39,59 @@ namespace TCPChat
         {
             try
             {
-                    tcpListener = new TcpListener(IPAddress.Any, port);
-                    tcpListener.Start();
-                    LocalCMD.WriteLine("Server started, waiting for connections...");
-                    LocalCMD.SwitchToPrompt();
+                    _tcpListener = new TcpListener(IPAddress.Any, port);
+                    _tcpListener.Start();
+                    localCmd.WriteLine("Server started, waiting for connections...");
+                    localCmd.SwitchToPrompt();
 
                 while (true)
                 {
-                    TcpClient tcpClient = tcpListener.AcceptTcpClient();        //If we get a new connection
-                    Client clientObject = new Client(tcpClient, this);          //Lets create new client
+                    var tcpClient = _tcpListener.AcceptTcpClient();        //If we get a new connection
+                    var clientObject = new Client(tcpClient, this);          //Lets create new client
 
-                    Thread clientThread = new Thread(new ThreadStart(clientObject.Process));    //And start new thread
+                    var clientThread = new Thread(clientObject.Process);    //And start new thread
                     clientThread.Start();
                 }
             }
-            catch (System.Net.Sockets.SocketException) { return; }
+            catch (SocketException) {
+            }
             catch (Exception ex)
             {
-                LocalCMD.WriteLine(ex.Message);
+                localCmd.WriteLine(ex.Message);
                 Disconnect();
             }
         }
 
         protected internal void BroadcastMessage(Message msg, string id)
         {
-            byte[] data = msg.Serialize();
-            LocalCMD.ParseMessage(msg);                 //If we want to broadcast message, lets write it in the server
+            var data = msg.Serialize();
+            localCmd.ParseMessage(msg);                 //If we want to broadcast message, lets write it in the server
 
-            for (int i = 0; i < clients.Count; i++)
+            foreach (var t in clients.Where(t => t.Id != id))
             {
-                if (clients[i].Id != id)
-                    clients[i].Stream.Write(data, 0, data.Length);  //And then if it isn a sender, send rhis message to client
+                t.Stream.Write(data, 0, data.Length);  //And then if it isn a sender, send rhis message to client
             }
         }
 
         protected internal void BroadcastFromServer(Message msg)
         {
-            byte[] data = msg.Serialize();
-            for (int i = 0; i < clients.Count; i++)
+            var data = msg.Serialize();
+            foreach (var t in clients)
             {
-                clients[i].Stream.Write(data, 0, data.Length);  //Send this message for all clients
+                t.Stream.Write(data, 0, data.Length);  //Send this message for all clients
             }
         }
 
         protected internal void Disconnect()
         {
-            Message msg;
+            _tcpListener.Stop();
+            localCmd.WriteLine("Server was stopped");
 
-            tcpListener.Stop();
-            LocalCMD.WriteLine("Server was stoped");
-
-            for (int i = 0; i < clients.Count; i++)
+            foreach (var t in clients)
             {
-                msg = new Message(10);                      //Send closing message to clients
-                clients[i].Stream.Write(msg.Serialize());
-                clients[i].Close();                         //And then close connection
+                var msg = new Message(10);
+                t.Stream.Write(msg.Serialize());
+                t.Close();                         //And then close connection
             }
         }
     }

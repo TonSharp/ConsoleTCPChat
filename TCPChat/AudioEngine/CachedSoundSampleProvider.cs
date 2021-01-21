@@ -5,7 +5,7 @@ using NAudio.Wave;
 
 namespace TCPChat.AudioEngine
 {
-    class CachedSoundSampleProvider : ISampleProvider
+    internal class CachedSoundSampleProvider : ISampleProvider
     {
         private readonly CachedSound cachedSound;
         private long position;
@@ -24,6 +24,6 @@ namespace TCPChat.AudioEngine
             return (int)samplesToCopy;
         }
 
-        public WaveFormat WaveFormat { get { return cachedSound.WaveFormat; } }
+        public WaveFormat WaveFormat => cachedSound.WaveFormat;
     }
 }

@@ -1,8 +1,6 @@
 ![Logo](Logo.png)
 # OPEN TCPChat
 
-:computer: :mailbox_with_mail: 
-
 **Status:**    
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/TonSharp/ConsoleTCPChat/.NET?logo=Build)
@@ -17,9 +15,9 @@
 - [Suport me on Patreon](https://www.patreon.com/TonSharp)
 
 **Content:**
- - [What is the TCPChat?](#What-is-the-TCPChat)
- - [Why do I need TCPChat?](#Why-do-I-need-TCPChat)
- - [What are the advantages of TCPChat?](#What-are-the-advantages-of-TCPChat)
+ - [What is the TCPChat?](#What-is-the-TCPChat?)
+ - [Why do I need TCPChat?](#Why-do-I-need-TCPChat?)
+ - [What are the advantages of TCPChat?](#What-are-the-advantages-of-TCPChat?)
  - [Development plan](#Development-plan)
  - [Technical Specification](#Technical-Specification)
 	 - [Client Side](#Client-Side)

@@ -2,34 +2,31 @@
 using System.IO;
 using System.Text;
 
-namespace TCPChat
+namespace TCPChat.Tools
 {
     public static class Serializer
     {
         /// <summary>
         /// Copy part of StartData starting and specified index
         /// </summary>
-        /// <param name="StartData">Origin</param>
-        /// <param name="MoveFrom">Starting index copy from</param>
+        /// <param name="startData">Origin</param>
+        /// <param name="moveFrom">Starting index copy from</param>
         /// <returns>New copied byte array</returns>
-        public static byte[] CopyFrom(byte[] StartData, int MoveFrom)
+        public static byte[] CopyFrom(byte[] startData, int moveFrom)
         {
-            byte[] MovedData = new byte[StartData.Length - MoveFrom];
+            var movedData = new byte[startData.Length - moveFrom];
 
-            for (int i = 0; i < StartData.Length; i++)
+            for (int i = 0; i < startData.Length; i++)
             {
-                if (i < MoveFrom) continue;
+                if (i < moveFrom) continue;
 
-                else
+                if (i - moveFrom < movedData.Length)
                 {
-                    if (i - MoveFrom < MovedData.Length)
-                    {
-                        MovedData[i - MoveFrom] = StartData[i];
-                    }
+                    movedData[i - moveFrom] = startData[i];
                 }
             }
 
-            return MovedData;
+            return movedData;
         }
 
         /// <summary>
@@ -40,12 +37,12 @@ namespace TCPChat
         /// <returns>Merged data1 + data2</returns>
         public static byte[] JoinBytes(byte[] data1, byte[] data2)
         {
-            byte[] ExpandedData = new byte[data1.Length + data2.Length];
+            byte[] expandedData = new byte[data1.Length + data2.Length];
 
-            data1.CopyTo(ExpandedData, 0);
-            data2.CopyTo(ExpandedData, data1.Length);
+            data1.CopyTo(expandedData, 0);
+            data2.CopyTo(expandedData, data1.Length);
 
-            return ExpandedData;
+            return expandedData;
         }
 
         /// <summary>
@@ -67,23 +64,21 @@ namespace TCPChat
         }
 
         /// <summary>
-        /// Serialaizes string or string array and reurns byte array
+        /// Serializes string or string array and returns byte array
         /// </summary>
         /// <param name="str"></param>
         /// <returns>Serialized string or strings array</returns>
         public static byte[] SerializeString(params string[] str)
         {
-            byte[] data = new byte[GetStringDataSize(str)];
+            var data = new byte[GetStringDataSize(str)];
 
-            using (MemoryStream stream = new MemoryStream(data))
+            using var stream = new MemoryStream(data);
+            var writer = new BinaryWriter(stream);
+
+            foreach (var s in str)
             {
-                BinaryWriter writer = new BinaryWriter(stream);
-
-                foreach (string s in str)
-                {
-                    writer.Write(s.Length);
-                    writer.Write(Encoding.Unicode.GetBytes(s));
-                }
+                writer.Write(s.Length);
+                writer.Write(Encoding.Unicode.GetBytes(s));
             }
 
             return data;
@@ -118,54 +113,52 @@ namespace TCPChat
         /// <summary>
         /// Deserialize strings based on ist count
         /// </summary>
-        /// <param name="data">Seriailized data</param>
+        /// <param name="data">Serialized data</param>
         /// <param name="count">Number of serialized strings</param>
         /// <returns>Deserialized string or string array</returns>
         public static string[] DeserializeString(byte[] data, int count)
         {
-            string[] deserialized = new string[count];
+            var deserialized = new string[count];
 
-            using (MemoryStream stream = new MemoryStream(data))
+            using (var stream = new MemoryStream(data))
             {
-                BinaryReader reader = new BinaryReader(stream);
+                var reader = new BinaryReader(stream);
 
-                for (int i = 0; i < count; i++)
+                for (var i = 0; i < count; i++)
                 {
-                    int size = reader.ReadInt32();
+                    var size = reader.ReadInt32();
                     deserialized[i] = Encoding.Unicode.GetString(reader.ReadBytes(size * sizeof(char)));
                 }
             }
-
-            int stringDataSize = GetStringDataSize(deserialized);
 
             return deserialized;
         }
 
         /// <summary>
-        /// Deserialize strings based on its count and retruns string or string array
+        /// Deserialize strings based on its count and returns string or string array
         /// </summary>
         /// <param name="data">Origin data</param>
         /// <param name="count">Count of strings</param>
-        /// <param name="OtherData">Remainings data</param>
+        /// <param name="otherData">Remaining data</param>
         /// <returns>Deserialized string or string array</returns>
-        public static string[] DeserializeString(byte[] data, int count, out byte[] OtherData)
+        public static string[] DeserializeString(byte[] data, int count, out byte[] otherData)
         {
             string[] deserialized = new string[count];
 
-            using (MemoryStream stream = new MemoryStream(data))
+            using (var stream = new MemoryStream(data))
             {
-                BinaryReader reader = new BinaryReader(stream);
+                var reader = new BinaryReader(stream);
 
-                for (int i = 0; i < count; i++)
+                for (var i = 0; i < count; i++)
                 {
-                    int size = reader.ReadInt32();
+                    var size = reader.ReadInt32();
                     deserialized[i] = Encoding.Unicode.GetString(reader.ReadBytes(size * sizeof(char)));
                 }
             }
 
             int stringDataSize = GetStringDataSize(deserialized);
 
-            OtherData = CopyFrom(data, stringDataSize);
+            otherData = CopyFrom(data, stringDataSize);
 
             return deserialized;
         }

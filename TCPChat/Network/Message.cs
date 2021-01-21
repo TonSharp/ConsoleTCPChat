@@ -1,6 +1,7 @@
 ﻿using System.IO;
+using TCPChat.Tools;
 
-namespace TCPChat
+namespace TCPChat.Network
 {
     public class Message
     {
@@ -15,7 +16,7 @@ namespace TCPChat
             get;
             private set;
         }
-        public string message
+        public string TextMessage
         {
             get;
             private set;
@@ -24,48 +25,49 @@ namespace TCPChat
         /// <summary>
         /// Use this for sending messages
         /// </summary>
-        /// <param name="PostCode">Usual between 1 - 4 (for messages), 10 - 13 (for commands)</param>
-        /// <param name="Sender">User who sends this</param>
-        /// <param name="Message">Message or Command</param>
-        public Message(int PostCode, User Sender, string Message)
+        /// <param name="postCode">Usual between 1 - 4 (for messages), 10 - 13 (for commands)</param>
+        /// <param name="sender">User who sends this</param>
+        /// <param name="message">Message or Command</param>
+        public Message(int postCode, User sender, string message)
         {
-            this.PostCode = PostCode;
-            this.Sender = Sender;
+            this.PostCode = postCode;
+            this.Sender = sender;
 
 
-            if (PostCode != 8 || PostCode != 9)  //If Sender doesn't connect or disconnect
-                message = Message;
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (postCode != 8 || postCode != 9)  //If Sender doesn't connect or disconnect
+                TextMessage = message;
         }
 
         /// <summary>
         /// Use this only for Connect or Disconnect or Updating UserData on Server
         /// </summary>
-        /// <param name="PostCode">8 or 9, 7</param>
-        /// <param name="Sender">Who connected/disconnected, updating</param>
-        public Message(int PostCode, User Sender)
+        /// <param name="postCode">8 or 9, 7</param>
+        /// <param name="sender">Who connected/disconnected, updating</param>
+        public Message(int postCode, User sender)
         {
-            this.PostCode = PostCode;
-            this.Sender = Sender;
+            this.PostCode = postCode;
+            this.Sender = sender;
         }
 
         /// <summary>
         /// Use this from getting or setting user parametres
         /// </summary>
-        /// <param name="PostCode"></param>
-        /// <param name="message"></param>
-        public Message(int PostCode, string message)
+        /// <param name="postCode"></param>
+        /// <param name="textMessage"></param>
+        public Message(int postCode, string textMessage)
         {
-            this.PostCode = PostCode;
-            this.message = message;
+            this.PostCode = postCode;
+            this.TextMessage = textMessage;
         }
 
         /// <summary>
         /// Use this only for sending events from server
         /// </summary>
-        /// <param name="PostCode"></param>
-        public Message(int PostCode)
+        /// <param name="postCode"></param>
+        public Message(int postCode)
         {
-            this.PostCode = PostCode;
+            this.PostCode = postCode;
         }
 
         /// <summary>
@@ -80,111 +82,101 @@ namespace TCPChat
         {
             byte[] userData;
             byte[] messageData;
-            byte[] Data;
+            byte[] data;
 
             switch(PostCode)
             {
-                case int i when (i >= 1 && i <= 4):             //If we send message
+                case { } i when (i >= 1 && i <= 4):             //If we send message
                     {
                         userData = Sender.Serialize();
-                        messageData = Serializer.SerializeString(message);
+                        messageData = Serializer.SerializeString(TextMessage);
 
-                        Data = new byte[sizeof(int) + userData.Length + messageData.Length];    //Size of PostCode + userData + MessageData
+                        data = new byte[sizeof(int) + userData.Length + messageData.Length];    //Size of PostCode + userData + MessageData
 
-                        using (MemoryStream stream = new MemoryStream(Data))
-                        {
-                            BinaryWriter writer = new BinaryWriter(stream);
-                            writer.Write(PostCode);
-                            writer.Write(userData);
-                            writer.Write(messageData);
-                        }
+                        using var stream = new MemoryStream(data);
+                        var writer = new BinaryWriter(stream);
+                        writer.Write(PostCode);
+                        writer.Write(userData);
+                        writer.Write(messageData);
 
-                        return Data;
+                        return data;
                     }
 
-                case int i when (i == 5 || i == 11):                        //If we sends or request ID
+                case { } i when (i == 5 || i == 11):                        //If we sends or request ID
                     {
-                        messageData = Serializer.SerializeString(message);
-                        Data = new byte[sizeof(int) + messageData.Length];  //Size of PostCode + ID
+                        messageData = Serializer.SerializeString(TextMessage);
+                        data = new byte[sizeof(int) + messageData.Length];  //Size of PostCode + ID
 
-                        using (MemoryStream stream = new MemoryStream(Data))
-                        {
-                            BinaryWriter writer = new BinaryWriter(stream);
-                            writer.Write(PostCode);
-                            writer.Write(messageData);
-                        }
+                        using var stream = new MemoryStream(data);
+                        var writer = new BinaryWriter(stream);
+                        writer.Write(PostCode);
+                        writer.Write(messageData);
 
-                        return Data;
+                        return data;
                     }
 
-                case int i when (i >= 7 && i <= 9):                         //If Update userData or Joining/Disconnecting
+                case { } i when (i >= 7 && i <= 9):                         //If Update userData or Joining/Disconnecting
                     {
                         userData = Sender.Serialize();
 
-                        Data = new byte[sizeof(int) + userData.Length];
+                        data = new byte[sizeof(int) + userData.Length];
 
-                        using (MemoryStream stream = new MemoryStream(Data))
-                        {
-                            BinaryWriter writer = new BinaryWriter(stream);
-                            writer.Write(PostCode);
-                            writer.Write(userData);
-                        }
+                        using var stream = new MemoryStream(data);
+                        var writer = new BinaryWriter(stream);
+                        writer.Write(PostCode);
+                        writer.Write(userData);
 
-                        return Data;
+                        return data;
                     }
 
                 case 10:                                                            //Server disconnect message
                     {
-                        Data = new byte[sizeof(int)];
-                        
-                        using(MemoryStream stream = new MemoryStream(Data))
-                        {
-                            BinaryWriter writer = new BinaryWriter(stream);
-                            writer.Write(PostCode);
-                        }
+                        data = new byte[sizeof(int)];
 
-                        return Data;
+                        using var stream = new MemoryStream(data);
+                        var writer = new BinaryWriter(stream);
+                        writer.Write(PostCode);
+
+                        return data;
                     }
 
                 default: return null;
             }
         }
-        public void Deserialize(byte[] data)
+
+        private void Deserialize(byte[] data)
         {
+            using var stream = new MemoryStream(data);
+            var reader = new BinaryReader(stream);                 //Firstly lets read PostCode
+            PostCode = reader.ReadInt32();
+
             byte[] userData;
             byte[] messageData;
-
-            using (MemoryStream stream = new MemoryStream(data))
+            switch(PostCode)                                                //Then lets deserialize based on PostCode
             {
-                BinaryReader reader = new BinaryReader(stream);                 //Firstly lets read PostCode
-                PostCode = reader.ReadInt32();
-
-                switch(PostCode)                                                //Then lets deserialize based on PostCode
+                case { } i when (i >= 1 && i <= 4):                         //If its usual message
                 {
-                    case int i when (i >= 1 && i <= 4):                         //If its usual message
-                        {
-                            userData = Serializer.CopyFrom(data, sizeof(int));
-                            Sender = new User(userData, out messageData);
+                    userData = Serializer.CopyFrom(data, sizeof(int));
+                    Sender = new User(userData, out messageData);
 
-                            message = Serializer.DeserializeString(messageData, 1)[0];
-                            break;
-                        }
+                    TextMessage = Serializer.DeserializeString(messageData, 1)[0];
+                    break;
+                }
 
-                    case int i when (i == 5 || i == 11):                        //If we sends or request ID
-                        {
-                            messageData = Serializer.CopyFrom(data, sizeof(int));
+                case { } i when (i == 5 || i == 11):                        //If we sends or request ID
+                {
+                    messageData = Serializer.CopyFrom(data, sizeof(int));
 
-                            message = Serializer.DeserializeString(messageData, 1)[0];
-                            break;
-                        }
+                    TextMessage = Serializer.DeserializeString(messageData, 1)[0];
+                    break;
+                }
 
-                    case int i when (i >= 7 && i <= 9):                         //If we updating UserData or Joining/Disconnecting
-                        {
-                            userData = Serializer.CopyFrom(data, sizeof(int));
-                            Sender = new User(userData);
+                case { } i when (i >= 7 && i <= 9):                         //If we updating UserData or Joining/Disconnecting
+                {
+                    userData = Serializer.CopyFrom(data, sizeof(int));
+                    Sender = new User(userData);
 
-                            break;
-                        }
+                    break;
                 }
             }
         }
