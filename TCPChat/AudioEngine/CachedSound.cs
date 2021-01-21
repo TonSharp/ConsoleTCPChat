@@ -6,7 +6,7 @@ using System.Text;
 
 namespace TCPChat.AudioEngine
 {
-    class CachedSound
+    public class CachedSound
     {
         public float[] AudioData { get; private set; }
         public WaveFormat WaveFormat { get; private set; }
@@ -22,6 +22,18 @@ namespace TCPChat.AudioEngine
                 wholeFile.AddRange(readBuffer.Take(samplesRead));
             }
             AudioData = wholeFile.ToArray();
+        }
+
+        public void TryPlay()
+        {
+            try
+            {
+                AudioPlaybackEngine.Instance.PlaySound(this);
+            }
+            catch
+            {
+                // ignored
+            }
         }
     }
 }

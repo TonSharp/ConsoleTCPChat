@@ -7,12 +7,12 @@ namespace TCPChat.Network
 {
     public class Connector
     {
-        public Server server { get; private set; }
-        public TcpClient client { get; private set; }
-        public NetworkStream stream { get; private set; }
+        public Server Server { get; private set; }
+        public TcpClient Client { get; private set; }
+        public NetworkStream Stream { get; private set; }
         public string Host { get; set; }
         public int Port { get; set; }
-        public ConnectionType ConnectionType { get; set; }
+        public ConnectionType ConnectionType { get; private set; }
 
 
         public Connector(ConnectionType connectionConnectionType = ConnectionType.None, string host = "127.0.0.1", int port = 23)
@@ -22,30 +22,28 @@ namespace TCPChat.Network
             Port = port;
         }
 
-        public Server StartServer(Cmd cmd, Action notification)
+        public void StartServer(Cmd cmd, Action notification)
         {
-            if (server != null)
+            if (Server != null)
             {
-                server.Disconnect();
-                server = null;
+                Server.Disconnect();
+                Server = null;
             }
 
             try
             {
-                server = new Server(cmd, Port, notification);
+                Server = new Server(cmd, Port, notification);
                 ConnectionType = ConnectionType.Server;
             }
             catch
             {
-                server = null;
+                Server = null;
             }
-
-            return server;
         }
 
-        public TcpClient StartClient(Thread receiveThread, Thread listenThread)
+        public void StartClient(Thread receiveThread, Thread listenThread)
         {
-            if (stream != null || client != null)
+            if (Stream != null || Client != null)
             {
                 StopClient(receiveThread);
             }
@@ -57,35 +55,33 @@ namespace TCPChat.Network
 
             try
             {
-                client = new TcpClient(Host, Port);
+                Client = new TcpClient(Host, Port);
                 ConnectionType = ConnectionType.Client;
-                stream = client.GetStream();
+                Stream = Client.GetStream();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 throw;
             }
-
-            return client;
         }
 
-        public void StopClient(Thread receiveThread)
+        private void StopClient(Thread receiveThread)
         {
             try
             {
-                if (stream != null)
+                if (Stream != null)
                 {
-                    stream.Close();
-                    stream.Dispose();
-                    stream = null;
+                    Stream.Close();
+                    Stream.Dispose();
+                    Stream = null;
                 }
 
-                if (client != null)
+                if (Client != null)
                 {
-                    client.Close();
-                    client.Dispose();
-                    client = null;
+                    Client.Close();
+                    Client.Dispose();
+                    Client = null;
                 }
 
                 ConnectionType = ConnectionType.None;
@@ -97,11 +93,11 @@ namespace TCPChat.Network
             }
         }
 
-        public void StopServer(Thread listenThread)
+        private void StopServer(Thread listenThread)
         {
             try
             {
-                server.Disconnect();
+                Server.Disconnect();
                 ConnectionType = ConnectionType.None;
                 listenThread.Interrupt();
             }

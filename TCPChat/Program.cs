@@ -7,13 +7,6 @@ using TCPChat.Tools;
 
 namespace TCPChat
 {
-    public enum Input
-    {
-        Command,
-        Message,
-        Empty
-    }
-
     internal static class Program
     {
         private static NetworkManager _network;
@@ -24,16 +17,9 @@ namespace TCPChat
 
         private static int Main(string[] args)
         {
-            try
-            {
-                _startupSound = new CachedSound("Audio/Startup.mp3");
-                _messageNotificationSound = new CachedSound("Audio/MessageNotification.mp3");
-                _connectionSound = new CachedSound("Audio/Connection.mp3");
-            }
-            catch
-            {
-                // ignored
-            }
+            _startupSound = Sound.TryLoadCached("Audio/Startup.mp3");
+            _messageNotificationSound = Sound.TryLoadCached("Audio/MessageNotification.mp3");
+            _connectionSound = Sound.TryLoadCached("Audio/Connection.mp3");
 
             Console.OutputEncoding = Encoding.Unicode;
             _network = new NetworkManager(Notification);
@@ -49,7 +35,7 @@ namespace TCPChat
 
             try
             {
-                AudioPlaybackEngine.Instance.PlaySound(_startupSound);
+                _startupSound?.TryPlay();
             }
             catch
             {
@@ -58,9 +44,9 @@ namespace TCPChat
 
             if (args.Length > 0)                //Check for console options
             {
-                for (int i = 0; i < args.Length - 1; i++)       
+                for (var i = 0; i < args.Length - 1; i++)       
                 {
-                    string arg = args[i];
+                    var arg = args[i];
 
                     switch (arg)
                     {
@@ -86,7 +72,7 @@ namespace TCPChat
                             {
                                 if (i + 1 < args.Length)
                                 {
-                                    Int32.TryParse(args[i + 1], out port);
+                                    int.TryParse(args[i + 1], out port);
                                     i++;
 
                                     startServer = true;
@@ -99,10 +85,10 @@ namespace TCPChat
                                 {
                                     if (args[i + 1].Contains(':'))                  //If host and port in format [host:port]
                                     {
-                                        string[] hostArgs = args[i + 1].Split(':'); //Split it
+                                        var hostArgs = args[i + 1].Split(':'); //Split it
 
                                         host = hostArgs[0];
-                                        Int32.TryParse(hostArgs[1], out port);      //And convert
+                                        int.TryParse(hostArgs[1], out port);      //And convert
 
                                         i++;
 
@@ -112,7 +98,7 @@ namespace TCPChat
                                     else if (i + 2 < args.Length)                   //If there is 2 arguments and format [host] [port]
                                     {
                                         host = args[i + 1];
-                                        Int32.TryParse(args[i + 2], out port);      //Convert it
+                                        int.TryParse(args[i + 2], out port);      //Convert it
                                         i += 2;
                                     }
                                 }
@@ -130,37 +116,23 @@ namespace TCPChat
 
                     if (host.Length > 0 && port > 0 && startClient && !startServer)     //If host and port are specified and this is client
                     {
-                        _network.connector.Host = host;
-                        _network.connector.Port = port;
+                        _network.Connector.Host = host;
+                        _network.Connector.Port = port;
 
                         if(_network.StartClient())                      //then start client
                         {
-                            try
-                            {
-                                AudioPlaybackEngine.Instance.PlaySound(_connectionSound);
-                            }
-                            catch
-                            {
-                                // ignored
-                            }
+                            _connectionSound.TryPlay();
                         }
                         _network.Cmd.SwitchToPrompt();
                     }
 
                     if (port > 0 && startServer && !startClient)    //If port specified and this is server
                     {
-                        _network.connector.Port = port;
+                        _network.Connector.Port = port;
 
                         if(_network.StartServer())                    //Start server
                         {
-                            try
-                            {
-                                AudioPlaybackEngine.Instance.PlaySound(_connectionSound);
-                            }
-                            catch
-                            {
-                                // ignored
-                            }
+                            _connectionSound.TryPlay();
                         }
 
                         _network.Cmd.SwitchToPrompt();
@@ -204,14 +176,7 @@ namespace TCPChat
 
                             if(_network.TryJoin(args))
                             {
-                                try
-                                {
-                                    AudioPlaybackEngine.Instance.PlaySound(_connectionSound);
-                                }
-                                catch
-                                {
-                                    // ignored
-                                }
+                                _connectionSound.TryPlay();
                             }
 
                             break;
@@ -222,14 +187,7 @@ namespace TCPChat
                             {
                                 if(_network.TryCreateRoom(args[1]))
                                 {
-                                    try
-                                    {
-                                        AudioPlaybackEngine.Instance.PlaySound(_connectionSound);
-                                    }
-                                    catch
-                                    {
-                                        // ignored
-                                    }
+                                    _connectionSound.TryPlay();
                                 }
                             }
 
@@ -265,12 +223,14 @@ namespace TCPChat
 
                     break;
                 }
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
         private static void Notification()
         {
-            AudioPlaybackEngine.Instance.PlaySound(_messageNotificationSound);
+            _messageNotificationSound.TryPlay();
         }
     }
 }
