@@ -1,18 +1,22 @@
-# Simple Console TCP Chat
-**Status:**    
-
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/TonSharp/Console-TCPChat/.NET?logo=Build)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/TonSharp/Console-TCPChat?logo=Size)
-![GitHub](https://img.shields.io/github/license/TonSharp/Console-TCPChat?logo=License)
-![GitHub last commit](https://img.shields.io/github/last-commit/TonSharp/Console-TCPChat)    
-![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/TonSharp/Console-TCPChat?include_prereleases)
-
-![GitHub followers](https://img.shields.io/github/followers/TonSharp?label=Follow&style=social)
-![GitHub watchers](https://img.shields.io/github/watchers/TonSharp/Console-TCPChat?label=Watch&style=social)
+![Logo](Logo.png)
+# OPEN TCPChat
 
 :computer: :mailbox_with_mail: 
 
-Content:
+**Status:**    
+
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/TonSharp/ConsoleTCPChat/.NET?logo=Build)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/TonSharp/ConsoleTCPChat?logo=Size)
+![GitHub](https://img.shields.io/github/license/TonSharp/ConsoleTCPChat?logo=License)
+![GitHub last commit](https://img.shields.io/github/last-commit/TonSharp/ConsoleTCPChat)    
+![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/TonSharp/ConsoleTCPChat?include_prereleases)
+
+![GitHub followers](https://img.shields.io/github/followers/TonSharp?label=Follow&style=social)
+![GitHub watchers](https://img.shields.io/github/watchers/TonSharp/ConsoleTCPChat?label=Watch&style=social)
+
+- [Suport me on Patreon](https://www.patreon.com/TonSharp)
+
+**Content:**
  - [What is the TCPChat?](#What-is-the-TCPChat)
  - [Why do I need TCPChat?](#Why-do-I-need-TCPChat)
  - [What are the advantages of TCPChat?](#What-are-the-advantages-of-TCPChat)
