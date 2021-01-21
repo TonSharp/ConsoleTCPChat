@@ -130,8 +130,8 @@ namespace TCPChat
 
                     if (host.Length > 0 && port > 0 && startClient && !startServer)     //If host and port are specified and this is client
                     {
-                        _network.Host = host;
-                        _network.Port = port;
+                        _network.connector.Host = host;
+                        _network.connector.Port = port;
 
                         if(_network.StartClient())                      //then start client
                         {
@@ -149,7 +149,7 @@ namespace TCPChat
 
                     if (port > 0 && startServer && !startClient)    //If port specified and this is server
                     {
-                        _network.Port = port;
+                        _network.connector.Port = port;
 
                         if(_network.StartServer())                    //Start server
                         {
@@ -257,7 +257,7 @@ namespace TCPChat
                         {
                             if (args.Length != 2) return;
                             _network.User.SetColor(ColorParser.GetColorFromString(args[1]));
-                            _network.UpdateUserData();
+                            _network.SendUserData();
 
                             break;
                         }

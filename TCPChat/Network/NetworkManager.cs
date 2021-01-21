@@ -11,28 +11,22 @@ namespace TCPChat.Network
         public User User;
         public readonly Cmd Cmd;
 
-        private Server server;
-        private TcpClient client;
-
         private Thread listenThread;
         private Thread receiveThread;
 
         private string id = "null";
 
-        protected internal string Host = "127.0.0.1";
-        protected internal int Port = 23;
-
-        private bool isConnected = false;
-        private bool isServer = false;
+        public Connector connector;
+        
         private bool receiveMessage = false;
-
-        private NetworkStream stream;
         private readonly Action notification;
 
         public NetworkManager(Action notification)
         {
             Cmd = new Cmd();
             this.notification = notification;
+            
+            connector = new Connector();
         }
 
         public string Process()
@@ -63,76 +57,44 @@ namespace TCPChat.Network
 
         public bool StartClient()
         {
-            if (stream != null || client != null)       //If the previous session was not closed
-            {
-                DisconnectClient();                     //Close it
-            }
+            connector.StartClient(receiveThread, listenThread);
+            SendUserData(8);
+            
+            Cmd.WriteLine("Successfully connected to the server");
+            
+            GetId();                                     //Gets own ID
+            receiveMessage = true;
 
-            if (isServer)                               //If it was Server
-            {
-                DisconnectServer();                     //Close it
-            }
-
-            try
-            {
-                client = new TcpClient(Host, Port);
-                isConnected = true;
-                stream = client.GetStream();            //Connects to the server and gets its stream
-
-                var userDataMessage = new Message(8, User);      //Sends UserData to the server
-                stream.Write(userDataMessage.Serialize());
-
-                Cmd.WriteLine("Successfully connected to the server");
-
-                GetId();                                //Gets own ID
-
-                receiveMessage = true;
-
-                receiveThread = new Thread(ReceiveMessage); //Starting receive message thread
-                receiveThread.Start();
-                return true;
-            }
-            catch (Exception e)
-            {
-                Cmd.WriteLine("Can't connect to the server: " + e.Message);
-                return false;
-            }
+            receiveThread = new Thread(ReceiveMessage);    //Starting receive message thread
+            receiveThread.Start();
+            
+            return true;
         }
-
-        public void UpdateUserData()
+    
+        public void SendUserData(int PostCode = 7)
         {
-            if (!isConnected) return;
-            var update = new Message(7, User);  //Updates userData on server
-            SendMessage(update);
+            if (connector.ConnectionType == ConnectionType.Client)
+            {
+                var UserData = new Message(PostCode, User);
+                SendMessage(UserData);
+            }
         }
 
         public bool StartServer()
         {
-            if(server != null)                  //If server was already started
-            {
-                server.Disconnect();            //Then close it
-                server = null;
-
-                listenThread?.Interrupt();
-            }
-
             try
             {
-                server = new Server(Cmd, Port, notification); //Start new server
-                isServer = true;
+                if(connector.ConnectionType == ConnectionType.Server) listenThread?.Interrupt();
+            
+                connector.StartServer(Cmd, notification);
 
-                if (isConnected) isConnected = false;   //If it was client. No, its doesnt)
-
-                listenThread = new Thread(server.Listen);
+                listenThread = new Thread(connector.server.Listen);
                 listenThread.Start();
-
-                isServer = true;
 
                 return true;
             }
-            catch(Exception e)
+            catch
             {
-                Cmd.WriteLine("Can't start server: " + e.Message);
                 return false;
             }
         }
@@ -166,12 +128,12 @@ namespace TCPChat.Network
                 var data = new byte[64];
                 var builder = new StringBuilder();
 
-                if (stream == null) return null;
+                if (connector.stream == null) return null;
                 do
                 {
-                    stream.Read(data, 0, data.Length);
+                    connector.stream.Read(data, 0, data.Length);
                     builder.Append(Encoding.Unicode.GetString(data));
-                } while (stream.DataAvailable);         //Lets read this while stream is available
+                } while (connector.stream.DataAvailable);         //Lets read this while stream is available
 
                 return Encoding.Unicode.GetBytes(builder.ToString());   //Return message bytes array
 
@@ -182,8 +144,8 @@ namespace TCPChat.Network
             { 
                 Cmd.WriteLine("You are disconnected"); 
                 Cmd.SwitchToPrompt();
-                if (isConnected) StopClient();
-                else if (isServer) DisconnectServer();
+                
+                connector.Disconnect(receiveThread, listenThread);
                 return null;
             }
 
@@ -217,44 +179,57 @@ namespace TCPChat.Network
 
         public bool IsConnectedToServer()
         {
-            return (client != null || stream != null) && isConnected;
+            return (connector.client != null || connector.stream != null) && connector.ConnectionType == ConnectionType.Client;
         }
 
         public bool TryCreateRoom(string port)
         {
-            int.TryParse(port, out Port);
+            try
+            {
+                connector.Port = Convert.ToInt32(port);
 
-            return StartServer();
+                return StartServer();
+            }
+            catch
+            {
+                return false;
+            }
         }
         public bool TryJoin(params string[] joinCommand)
         {
-            switch (joinCommand.Length)
+            try
             {
-                case 2:
+                switch (joinCommand.Length)
                 {
-                    var data = joinCommand[1].Split(":");
+                    case 2:
+                    {
+                        var data = joinCommand[1].Split(":");
 
-                    int.TryParse(data[1], out Port);
-                    Host = data[0];
-                    break;
+                        connector.Port = Convert.ToInt32(data[1]);
+                        connector.Host = data[0];
+                        
+                        break;
+                    }
+                    case 3:
+                        connector.Host = joinCommand[0];
+                        connector.Port = Convert.ToInt32(joinCommand[1]);
+                        
+                        break;
+                    
+                    default:
+                        return false;
                 }
-                case 3:
-                    Host = joinCommand[0];
-                    int.TryParse(joinCommand[1], out Port);
-                    break;
-                default:
-                    return false;
-            }
 
-            return StartClient();
+                return StartClient();
+            }
+            catch
+            {
+                return false;
+            }
         }
         public void TryDisconnect()
         {
-            if (isConnected)
-                DisconnectClient();
-
-            else if (isServer) 
-                DisconnectServer();
+            connector.Disconnect(receiveThread, listenThread);
         }
 
         /// <summary>
@@ -271,7 +246,7 @@ namespace TCPChat.Network
                 var data = message.Serialize();
 
                 Cmd.UserWriteLine(msg, User);
-                stream.Write(data, 0, data.Length);         //Serialize message and send it
+                connector.stream.Write(data, 0, data.Length);         //Serialize message and send it
             }
             catch(Exception e)
             {
@@ -286,7 +261,7 @@ namespace TCPChat.Network
 
                 if(data.Length > 0)             //If message is not empty
                 {
-                    stream.Write(data, 0, data.Length); //Send it
+                    connector.stream.Write(data, 0, data.Length); //Send it
                 }
             }
             catch(Exception e)
@@ -296,14 +271,18 @@ namespace TCPChat.Network
         }
         public void SendMessage(string msg)
         {
-            if (isConnected)
-                SendMessage(msg, 1);
-
-            else if (isServer) 
-                SendServerMessage(msg, 1);
-
-            else 
-                Cmd.UserWriteLine(msg, User);
+            switch (connector.ConnectionType)
+            {
+                case ConnectionType.Client:
+                    SendMessage(msg, 1);
+                    break;
+                case ConnectionType.Server:
+                    SendServerMessage(msg, 1);
+                    break;
+                default:
+                    Cmd.UserWriteLine(msg, User);
+                    break;
+            }
         }
 
         private void SendServerMessage(string msg, int postCode)
@@ -314,7 +293,7 @@ namespace TCPChat.Network
                 var message = new Message(postCode, User, msg);
 
                 Cmd.UserWriteLine(msg, User);
-                server.BroadcastFromServer(message);                            //Broadcast message to all clients
+                connector.server.BroadcastFromServer(message);                            //Broadcast message to all clients
             }
             catch(Exception e)
             {
@@ -338,34 +317,14 @@ namespace TCPChat.Network
                 receiveThread.Interrupt();
                 receiveThread = null;
             }
-            if (stream != null)
-            {
-                stream.Close();
-                stream.Dispose();
-                stream = null;
-            }
-            if (client != null)
-            {
-                client.Close();
-                client.Dispose();
-                client = null;
-            }
-
-            isConnected = false;        //Dispose everything
         }
 
         private void DisconnectClient()
         {
             Message msg = new Message(9, User);  //Send message to server about disconnecting
-            stream.Write(msg.Serialize());       //Disconnect this client from server
+            connector.stream.Write(msg.Serialize());       //Disconnect this client from server
 
             StopClient();
-        }
-        private void DisconnectServer()
-        {
-            server.Disconnect();
-
-            isServer = false;
         }
 
         private void ParseMessage(Message message)
