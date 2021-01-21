@@ -42,8 +42,15 @@ namespace TCPChat
 
         protected internal void RegisterUser()
         {
+            tryoncemore:
             Console.Write("Enter your name: ");
             string userName = Console.ReadLine();
+            if(userName.Length > 16)
+            {
+                Console.WriteLine("Name is too long");
+                goto tryoncemore;
+            }
+
             Console.Title = userName;             //Set title for user with him userName
 
             Console.Write("Enter your color (white): ");
@@ -187,8 +194,8 @@ namespace TCPChat
             { 
                 cmd.WriteLine("You are disconnetcted"); 
                 cmd.SwitchToPrompt();
-                if (isConnected) DisconnectClient();
-                else if(isServer) DisconnectServer();
+                if (isConnected) StopClient();
+                else if (isServer) DisconnectServer();
                 return null;
             }
 
@@ -353,11 +360,8 @@ namespace TCPChat
             cmd.WriteLine("Your ID: "+ id);
         }
 
-        private void DisconnectClient()
+        private void StopClient()
         {
-            Message msg = new Message(9, user);  //Send message to server about disconnecting
-            stream.Write(msg.Serialize());       //Disconnect this client from server
-
             if (RecieveMessages)
             {
                 RecieveMessages = false;
@@ -378,6 +382,14 @@ namespace TCPChat
             }
 
             isConnected = false;        //Dispose everything
+        }
+
+        private void DisconnectClient()
+        {
+            Message msg = new Message(9, user);  //Send message to server about disconnecting
+            stream.Write(msg.Serialize());       //Disconnect this client from server
+
+            StopClient();
         }
         private void DisconnectServer()
         {

@@ -18,6 +18,12 @@ namespace TCPChat
                 else if(color.Length == 7)
                 {
                     consoleColor = System.Drawing.ColorTranslator.FromHtml(color); // Or parse html color
+                    byte[] bytecolor = BitConverter.GetBytes(consoleColor.ToArgb());
+
+                    if(bytecolor[0] <= 48 && bytecolor[1] <= 48 && bytecolor[2] <= 48)
+                    {
+                        consoleColor = Color.White;
+                    }
                 }
 
 
