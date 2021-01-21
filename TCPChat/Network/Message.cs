@@ -196,7 +196,7 @@ namespace TCPChat.Network
 //10 - Server Disconnect message
 //11 - Send ID from server message
 //12 - Send UserData from server message
-//13 - reserved
+//13 - Send Unsupported version message TODO:
 //14 - reserved
 //15 - reserved
 //16 - reserved

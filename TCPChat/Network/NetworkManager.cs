@@ -13,7 +13,7 @@ namespace TCPChat.Network
         private Thread listenThread;
         private Thread receiveThread;
 
-        private string id = "null";
+        private string id;
 
         public readonly Connector Connector;
         

@@ -33,14 +33,8 @@ namespace TCPChat
             var startServer = false;
             var startClient = false;
 
-            try
-            {
-                _startupSound?.TryPlay();
-            }
-            catch
-            {
-                // ignored
-            }
+
+            _startupSound?.TryPlay();
 
             if (args.Length > 0)                //Check for console options
             {
