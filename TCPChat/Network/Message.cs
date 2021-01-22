@@ -3,6 +3,8 @@ using TCPChat.Tools;
 
 namespace TCPChat.Network
 {
+    //TODO:
+    //1. Add hash version verify system
     public class Message
     {
         public int PostCode
