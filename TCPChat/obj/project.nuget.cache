@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "Mlha3NZKMFI0at8eUFhvFzEkWuVDJ+OcqepYjdFvIp8dyvQ/J2hOklwq3A5i3pLdELz76RfnCVydiZrCnryGJw==",
+  "dgSpecHash": "emKJribYFFvvU8ePsbky1nZfyyRyF9ARL8060HDStA9gtk16wECmeOaEiDv3vtYbxMJ2apEtpWv3slxBfdua8A==",
   "success": true,
   "projectFilePath": "D:\\Projects\\CS\\TCPChat\\TCPChat\\TCPChat.csproj",
   "expectedPackageFiles": [
@@ -41,8 +41,7 @@
     "C:\\Users\\TonSharp\\.nuget\\packages\\system.text.encoding\\4.0.11\\system.text.encoding.4.0.11.nupkg.sha512",
     "C:\\Users\\TonSharp\\.nuget\\packages\\system.text.regularexpressions\\4.1.0\\system.text.regularexpressions.4.1.0.nupkg.sha512",
     "C:\\Users\\TonSharp\\.nuget\\packages\\system.threading\\4.0.11\\system.threading.4.0.11.nupkg.sha512",
-    "C:\\Users\\TonSharp\\.nuget\\packages\\system.threading.tasks\\4.0.11\\system.threading.tasks.4.0.11.nupkg.sha512",
-    "C:\\Users\\TonSharp\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\3.1.11\\microsoft.netcore.app.host.win-x64.3.1.11.nupkg.sha512"
+    "C:\\Users\\TonSharp\\.nuget\\packages\\system.threading.tasks\\4.0.11\\system.threading.tasks.4.0.11.nupkg.sha512"
   ],
   "logs": []
 }
