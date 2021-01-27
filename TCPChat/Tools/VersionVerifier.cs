@@ -19,16 +19,32 @@ namespace TCPChat.Tools
 
         public static void PrintHash()
         {
-            var i = 0;
-            var Data = GetHash();
+            byte[] Data = GetHash();
+
             StringBuilder sOutput = new StringBuilder(Data.Length);
-            for (i=0;i < Data.Length; i++)
+            int i;
+            for (i = 0; i < Data.Length; i++)
             {
                 sOutput.Append(Data[i].ToString("X2"));
             }
             Console.WriteLine(sOutput.ToString());
         }
-        private static byte[] GetHash()
+
+        public static string GetStringHash()
+        {
+            byte[] Data = GetHash();
+
+            StringBuilder sOutput = new StringBuilder(Data.Length);
+            int i;
+            for (i = 0; i < Data.Length; i++)
+            {
+                sOutput.Append(Data[i].ToString("X2"));
+            }
+
+            return sOutput.ToString();
+        }
+
+        public static byte[] GetHash()
         {
             using var stream = new FileStream("TCPChat.dll", FileMode.Open, FileAccess.Read, FileShare.Read);
             var hash = new MD5CryptoServiceProvider().ComputeHash(stream);

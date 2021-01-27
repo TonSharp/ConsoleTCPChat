@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using TCPChat.Messages;
 using TCPChat.Network;
 using Console = Colorful.Console;
 
@@ -113,12 +114,23 @@ namespace TCPChat.Tools
         {
             switch (message.PostCode)
             {
-                case 1:
-                    UserWriteLine(message.TextMessage, message.Sender); break;
-                case 8:
-                    ConnectionMessage(message.Sender, "has joined"); break;
-                case 9:
-                    ConnectionMessage(message.Sender, "has disconnected"); break;
+                case { } i when (i >= 1 && i <= 4):
+                {
+                    var msg = message as SimpleMessage;
+                    UserWriteLine(msg?.SendData, msg?.Sender);
+                    
+                    break;
+                }
+                
+                case 7:
+                {
+                    var msg = message as ConnectionMessage;
+                    if(msg?.Connection == Connection.Connect) UserWriteLine("Has joined", msg.Sender);
+                    else UserWriteLine("Has disconnected", msg?.Sender);
+                    
+                    break;
+                }
+                
                 default: return;
             }
 

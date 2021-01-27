@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using TCPChat.Messages;
 using TCPChat.Tools;
 
 namespace TCPChat.Network
@@ -89,7 +90,7 @@ namespace TCPChat.Network
 
             foreach (var t in clients)
             {
-                var msg = new Message(10);
+                var msg = new PostCodeMessage(10);
                 t.Stream.Write(msg.Serialize());
                 t.Close();                         //And then close connection
             }

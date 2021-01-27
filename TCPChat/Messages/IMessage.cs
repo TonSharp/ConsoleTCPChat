@@ -1,7 +1,6 @@
 ﻿namespace TCPChat.Messages
 {
-    public interface IMessage
+    public interface IMessage : IMessageDeserializable, IMessageSerializable
     {
-        
     }
 }

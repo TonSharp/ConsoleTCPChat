@@ -1,13 +1,11 @@
-﻿using TCPChat.Network;
+﻿using System.IO;
+using TCPChat.Network;
 
 namespace TCPChat.Messages
 {
     public abstract class Message : IMessage
     {
         public int PostCode { get; protected set; }
-        public User Sender { get; protected set; }
-        public string SendData { get; protected set; }
-        public Method Method { get; protected set; }
 
         public abstract byte[] Serialize();
         public abstract void Deserialize(byte[] data);
@@ -19,15 +17,15 @@ namespace TCPChat.Messages
 //2 - Send warning message +-
 //3 - Send error message +-
 //4 - Send notification message +-
-//5 - Get ID message +
-//6 - Get UserData message -
-//7 - Send UserData message 
-//8 - Join message
-//9 - Disconnect message
-//10 - Server Disconnect message
-//11 - Send ID from server message +
-//12 - Send UserData from server message
-//13 - Send Unsupported version message TODO:
+//5 - ID message (request from client or send from server) +
+//6 - UserData message (request from server or send from client) +
+//7 - Connection message (join or disconnect) +
+//8 - reserved
+//9 - reserved
+//10 - Server Disconnect message + (PostCodeMessage)
+//11 - Unsupported version message + (PostCodeMessage)
+//12 - reserved
+//13 - reserved
 //14 - reserved
 //15 - reserved
 //16 - reserved

@@ -7,17 +7,20 @@ namespace TCPChat.Messages
     // ReSharper disable once InconsistentNaming
     public class IDMessage : Message
     {
-
+        public Method Method { get; private set; }
+        public string SendData { get; private set; }
+        
         public IDMessage(Method method, string id = "")
         {
             Method = method;
             PostCode = 5;
 
-            if (Method == Method.Send)
-            {
-                SendData = id;
-                PostCode = 11;
-            }
+            if (Method == Method.Send) SendData = id;
+        }
+
+        public IDMessage(byte[] data)
+        {
+            Deserialize(data);
         }
         
         public override byte[] Serialize()
@@ -64,7 +67,7 @@ namespace TCPChat.Messages
 
             var code = reader.ReadInt32();
 
-            if (code != 5 && code != 11) return;
+            if (code != 5) return;
             PostCode = code;
 
             switch (PostCode)
@@ -74,6 +77,12 @@ namespace TCPChat.Messages
                     Method = Enum.Parse<Method>(
                         Serializer.DeserializeString(Serializer.CopyFrom(data, sizeof(int)), 1)[0]
                     );
+
+                        if(Method == Method.Send)
+                        {
+                            var sendData = Serializer.CopyFrom(data, sizeof(int) + Serializer.GetStringDataSize(Method.ToString()));
+                            SendData = Serializer.DeserializeString(sendData, 1)[0];
+                        }
 
                     break;
                 }

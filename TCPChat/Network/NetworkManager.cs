@@ -2,6 +2,7 @@
 using System.Text;
 using System.Threading;
 using TCPChat.Tools;
+using TCPChat.Messages;
 
 namespace TCPChat.Network
 {
@@ -58,26 +59,18 @@ namespace TCPChat.Network
         public bool StartClient()
         {
             Connector.StartClient(receiveThread, listenThread);
-            SendUserData(8);
             
+            var joiningMessage = new ConnectionMessage(Connection.Connect, User);
+            SendMessage(joiningMessage);
+
             Cmd.WriteLine("Successfully connected to the server");
-            
-            GetId();                                     //Gets own ID
+                                                
             receiveMessage = true;
 
             receiveThread = new Thread(ReceiveMessage);    //Starting receive message thread
             receiveThread.Start();
             
             return true;
-        }
-    
-        public void SendUserData(int postCode = 7)
-        {
-            if (Connector.ConnectionType == ConnectionType.Client)
-            {
-                var userData = new Message(postCode, User);
-                SendMessage(userData);
-            }
         }
 
         public bool StartServer()
@@ -108,7 +101,7 @@ namespace TCPChat.Network
                     var message = GetMessage();
 
                     if (message == null || message.Length <= 0) continue;
-                    var msg = new Message(message);     //Lets get it
+                    var msg = IMessageDeserializable.Parse(message);    //Lets get it
                     ParseMessage(msg);                      //And parse
                 }
                 catch (ThreadInterruptedException) { return; }
@@ -127,12 +120,13 @@ namespace TCPChat.Network
             {
                 var data = new byte[64];
                 var builder = new StringBuilder();
+                int bytes;
 
                 if (Connector.Stream == null) return null;
                 do
                 {
-                    Connector.Stream.Read(data, 0, data.Length);
-                    builder.Append(Encoding.Unicode.GetString(data));
+                    bytes = Connector.Stream.Read(data, 0, data.Length);
+                    builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
                 } while (Connector.Stream.DataAvailable);         //Lets read this while stream is available
 
                 return Encoding.Unicode.GetBytes(builder.ToString());   //Return message bytes array
@@ -236,16 +230,7 @@ namespace TCPChat.Network
         /// Sends messages with PostCodes between 1-4
         /// </summary>
         /// <param name="msg"></param>
-        /// <param name="postCode"></param>
-        private void SendMessage(string msg, int postCode)
-        {
-
-            if (msg.Trim().Length < 0) throw new Exception("Message is empty"); //If message empty
-            var message = new Message(postCode, User, msg);
-            
-            SendMessage(message);
-        }
-        private void SendMessage(Message msg)
+        public void SendMessage(Message msg)
         {
             try
             {
@@ -267,44 +252,23 @@ namespace TCPChat.Network
                 Cmd.WriteLine("Can't send message: " + e.Message);  //If something went wrong ))
             }
         }
-        public void SendMessage(string msg)
-        {
-            switch (Connector.ConnectionType)
-            {
-                case ConnectionType.Client:
-                    SendMessage(msg, 1);
-                    break;
-                case ConnectionType.Server:
-                    SendServerMessage(msg, 1);
-                    break;
-                default:
-                    Cmd.UserWriteLine(msg, User);
-                    break;
-            }
-        }
 
-        private void SendServerMessage(string msg, int postCode)
+        private void SendServerMessage(Message message)
         {
             try
             {
-                if (msg.Trim().Length < 1) throw new Exception("Message is empty");  //The same situation
-                var message = new Message(postCode, User, msg);
-
-                Cmd.UserWriteLine(msg, User);
+                if (message.PostCode >= 1 && message.PostCode <= 4)
+                {
+                    var msg = message as SimpleMessage;
+                    Cmd.UserWriteLine(msg?.SendData, User);
+                }
+                
                 Connector.Server.BroadcastFromServer(message);                            //Broadcast message to all clients
             }
             catch(Exception e)
             {
                 Cmd.WriteLine("Can't send message from the server: " + e.Message);
             }
-        }
-
-        private void GetId()
-        {
-            var msg = new Message(GetMessage());
-
-            id = msg.TextMessage;
-            Cmd.WriteLine("Your ID: "+ id);
         }
 
         private void StopClient()
@@ -319,7 +283,7 @@ namespace TCPChat.Network
 
         private void DisconnectClient()
         {
-            Message msg = new Message(9, User);  //Send message to server about disconnecting
+            var msg = new ConnectionMessage(Connection.Disconnect, User);     //Send message to server about disconnecting
             Connector.Stream.Write(msg.Serialize());       //Disconnect this client from server
 
             StopClient();
@@ -329,18 +293,50 @@ namespace TCPChat.Network
         {
             switch (message.PostCode)
             {
-                case 1:
-                    Cmd.UserWriteLine(message.TextMessage, message.Sender); notification(); break;
-                case 8:
-                    Cmd.ConnectionMessage(message.Sender, "has joined"); break;
-                case 9:
-                    Cmd.ConnectionMessage(message.Sender, "has disconnected"); break;
+                case {} i when (i >= 1 && i <= 4):
+                {
+                    var simpleMessage = message as SimpleMessage;
+                    Cmd.UserWriteLine(simpleMessage?.SendData, simpleMessage?.Sender);
+                    notification();
+                    
+                    break;
+                }
+                case 5:
+                {
+                    var idMessage = message as IDMessage;
+                    if (idMessage?.Method == Method.Send)
+                        {
+                            id = idMessage.SendData;
+                            Cmd.WriteLine($"Your id is: {id}");
+                        }
+                        
+
+                    break;
+                }
+                case 7:
+                {
+                    var connectionMessage = message as ConnectionMessage;
+                    if(connectionMessage?.Connection == Connection.Connect)
+                        Cmd.ConnectionMessage(connectionMessage.Sender, "has joined");
+                    else
+                        Cmd.ConnectionMessage(connectionMessage?.Sender, "has disconnected");
+                    
+                    break;
+                }
                 case 10:
-                    {
-                        DisconnectClient();                 //If server sends us message about stopping
-                        Cmd.WriteLine("Server was stopped"); //We are decide to write this
-                        break;
-                    }
+                {
+                    DisconnectClient();                 //If server sends us message about stopping
+                    Cmd.WriteLine("Server was stopped"); //We are decide to write this
+                    
+                    break;
+                }
+                case 11:
+                {
+                    DisconnectClient();
+                    Cmd.WriteLine("Hash sum is not correct");
+                    
+                    break;
+                }
                 default: return;
             }
 

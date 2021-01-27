@@ -2,6 +2,7 @@
 {
     public enum Method
     {
-        
+        Send,
+        Get
     }
 }

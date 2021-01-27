@@ -2,6 +2,7 @@
 using System.Text;
 
 using TCPChat.AudioEngine;
+using TCPChat.Messages;
 using TCPChat.Network;
 using TCPChat.Tools;
 
@@ -151,7 +152,7 @@ namespace TCPChat
             {
                 //If this is not a command
                 case Input.Message:
-                    _network.SendMessage(command);
+                    _network.SendMessage(new SimpleMessage(_network.User, command));
                     break;
                 case Input.Command:
                 {
@@ -181,7 +182,7 @@ namespace TCPChat
                             {
                                 if(_network.TryCreateRoom(args[1]))
                                 {
-                                    _connectionSound.TryPlay();
+                                    _connectionSound?.TryPlay();
                                 }
                             }
 
@@ -209,10 +210,19 @@ namespace TCPChat
                         {
                             if (args.Length != 2) return;
                             _network.User.SetColor(ColorParser.GetColorFromString(args[1]));
-                            _network.SendUserData();
+                            _network.SendMessage(new UserDataMessage(Method.Send, _network.User));
 
                             break;
                         }
+
+                            case { } s when (s == "hash"):
+                                {
+                                    if(args.Length == 1)
+                                    {
+                                        _network.Cmd.WriteLine(VersionVerifier.GetStringHash());
+                                    }
+                                    break;
+                                }
                     }
 
                     break;

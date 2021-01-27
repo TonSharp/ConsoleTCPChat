@@ -2,6 +2,7 @@
 {
     public enum Connection
     {
-        
+        Connect,
+        Disconnect
     }
 }

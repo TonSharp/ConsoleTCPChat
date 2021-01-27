@@ -6,12 +6,20 @@ namespace TCPChat.Messages
 {
     public class SimpleMessage : Message
     {
+        public User Sender { get; private set; }
+        public string SendData { get; private set; }
+        public Method Method { get; private set; }
         public SimpleMessage(User sender, string message)
         {
-            this.Sender = sender;
+            Sender = sender;
             PostCode = 1;
             SendData = message;
             Method = Method.Send;
+        }
+
+        public SimpleMessage(byte[] data)
+        {
+            Deserialize(data);
         }
         
         public override byte[] Serialize()
