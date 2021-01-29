@@ -74,14 +74,13 @@ Available **PostCodes**:
 |PostCodes|Description|
 |--|--|
 |1-4|Usual messages from client or server|
-|5| Request from client for **ID**|
-|6|Request from client for **UserData**|
-|7|Reserved|
-|8|Client connecting message|
-|9|Client disconnecting message|
-|10|Server disconnecting message|
-|11|Sending client **ID** from Server|
-|12|Sending client **UserData** from Server|
+|5|**ID** Message (request or send)|
+|6|**UserData** Message (request or send)|
+|7|Connection message (joining or disconnection)|
+|8|reserved|
+|9|reserved|
+|10|Server disconnection message|
+|11|Unsupported version message|
 
 In the full version of Message, the **PostCode** is followed by the public **UserData**, followed by the message **Text**. Depending on the **PostCode**, the Message may not contain **UserData** or the message **Text**.
 
