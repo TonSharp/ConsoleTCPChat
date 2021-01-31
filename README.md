@@ -103,6 +103,7 @@ Here is a list of currently available commands:
 |**/dconnect**|The same as /disconnect|
 |**/clear**|Clears screen|
 |**/clr**|The same as /clear|
+|**/hash**|Prints application hash sum|
 
 ### User commands
 
